@@ -1,114 +1,266 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Shebar Laundry Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> A modern, full-featured laundry management system built with Laravel, MySQL, Tailwind CSS, and Docker. This guide will help you set up, run, and understand the project as a junior developer.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Table of Contents
 
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   [Shebar Laundry Management System](#shebar-laundry-management-system)
+    -   [Table of Contents](#table-of-contents)
+    -   [Project Overview](#project-overview)
+    -   [Features](#features)
+    -   [Tech Stack](#tech-stack)
+    -   [Getting Started](#getting-started)
+        -   [Prerequisites](#prerequisites)
+        -   [Local Setup (with Docker)](#local-setup-with-docker)
+        -   [Manual Setup (without Docker)](#manual-setup-without-docker)
+    -   [Running Tests](#running-tests)
+    -   [Project Structure](#project-structure)
+    -   [Common Tasks](#common-tasks)
+    -   [Exporting Data](#exporting-data)
+    -   [Troubleshooting](#troubleshooting)
+    -   [Resources](#resources)
+    -   [Environment](#environment)
+    -   [Queues \& Scheduler](#queues--scheduler)
+    -   [Mail](#mail)
+    -   [Broadcasting (Realtime)](#broadcasting-realtime)
+    -   [Seeding \& Default Access](#seeding--default-access)
+    -   [Health Check](#health-check)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Project Overview
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Shebar Laundry Management System is designed to streamline laundry operations, including order management, inventory, user roles, and reporting. It supports multiple user roles (Admin, Receptionist, Manager, Operator) and provides robust filtering, exporting, and notification features.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   Role-based dashboards and navigation
+-   Order management with advanced filters (status, date, customer, operator)
+-   Inventory and stock tracking
+-   CSV/Excel and PDF export (honors filters)
+-   Activity logs and notifications
+-   Responsive UI with Tailwind CSS
 
-## Laravel Sponsors
+## Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+-   **Backend:** Laravel (PHP)
+-   **Frontend:** Blade, Tailwind CSS, Vite
+-   **Database:** MySQL (default), SQLite (for testing)
+-   **Containerization:** Docker, Docker Compose
+-   **Other:** Spatie Laravel Permission, Pest (testing)
 
-### Premium Partners
+---
 
--   **[Vehikl](https://vehikl.com)**
--   **[Tighten Co.](https://tighten.co)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
--   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
--   **[Redberry](https://redberry.international/laravel-development)**
--   **[Active Logic](https://activelogic.com)**
+## Getting Started
 
-## Contributing
+### Prerequisites
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+-   [Docker & Docker Compose](https://docs.docker.com/get-docker/) (recommended)
+-   PHP >= 8.2 (if running without Docker)
+-   Composer
+-   Node.js & npm
 
-## Code of Conduct
+### Local Setup (with Docker)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. **Clone the repository:**
+    ```bash
+    git clone <repo-url>
+    cd sheger_automatic_laundry
+    ```
+2. **Copy environment file:**
+    ```bash
+    cp .env.example.production .env
+    ```
+3. **Start containers:**
+    ```bash
+    docker compose up -d --build
+    ```
+4. **Install dependencies & generate key:**
+    ```bash
+    docker compose exec app composer install
+    docker compose exec app php artisan key:generate
+    docker compose exec app npm install
+    docker compose exec app npm run build
+    ```
+5. **Run migrations & seeders:**
+    ```bash
+    docker compose exec app php artisan migrate --force
+    docker compose exec app php artisan db:seed
+    docker compose exec app php artisan storage:link
+    ```
+6. **Access the app:**
+    - Visit [http://localhost](http://localhost)
 
-## Security Vulnerabilities
+### Manual Setup (without Docker)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Install PHP, Composer, Node.js, MySQL**
+2. **Clone the repository & copy `.env`:**
+    ```bash
+    git clone <repo-url>
+    cd sheger_automatic_laundry
+    cp .env.example.production .env
+    ```
+3. **Install dependencies:**
+    ```bash
+    composer install
+    npm install
+    npm run build
+    ```
+4. **Configure your `.env` database settings**
+5. **Generate app key & run migrations:**
+    ```bash
+    php artisan key:generate
+    php artisan migrate --force
+    php artisan db:seed
+    php artisan storage:link
+    ```
+6. **Start the server:**
+    ```bash
+    php artisan serve
+    ```
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Running Tests
 
-composer create-project laravel/laravel shebar-laundry
+Run all tests:
 
-cd shebar-laundry
+```bash
+docker compose exec app php artisan test
+# or, for Pest
+docker compose exec app ./vendor/bin/pest
+```
 
-composer require spatie/laravel-permission
+## Project Structure
 
-npm install tailwindcss @tailwindcss/vite
+-   `app/` - Main application code (Models, Controllers, Services, etc.)
+-   `routes/` - Route definitions (`web.php`, `api.php`)
+-   `resources/views/` - Blade templates
+-   `public/` - Public assets and entry point
+-   `database/` - Migrations, seeders, factories
+-   `config/` - Configuration files
+-   `tests/` - Feature and unit tests
 
-# Setup Environment and Database
+## Common Tasks
 
-# Copy environment file and generate application key
+-   **Add a migration:**
+    ```bash
+    docker compose exec app php artisan make:migration create_example_table
+    ```
+-   **Run a seeder:**
+    ```bash
+    docker compose exec app php artisan db:seed --class=YourSeeder
+    ```
+-   **Queue worker (background jobs):**
+    ```bash
+    docker compose exec worker php artisan queue:work
+    ```
 
-cp .env.example .env
-composer install
-php artisan key:generate
+## Exporting Data
 
-# If using SQLite, create the database file
+On any list page (Orders, Users, Customers, etc.):
 
-mkdir -p database
-touch database/database.sqlite
+-   Set your filters/search as needed
+-   Click **Export CSV**, **Export Excel**, or **Export PDF**
+-   Exports include all rows matching current filters (not just the current page)
 
-php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+## Troubleshooting
 
-php artisan migrate
-php artisan db:seed --class=RolesAndPermissionsSeeder
+-   **Permission issues:** Ensure `storage/` and `bootstrap/cache/` are writable
+-   **Database errors:** Check your `.env` DB settings and that the DB container is running
+-   **Assets not updating:** Run `npm run build` or restart Docker containers
 
-php artisan db:seed
+## Resources
 
-php artisan test --testsuite=Feature --stop-on-failure
-/vendor/bin/pest --colors=always -v tests/Feature/Auth/AuthenticationTest.php
+-   [Laravel Documentation](https://laravel.com/docs)
+-   [Tailwind CSS Docs](https://tailwindcss.com/docs)
+-   [Pest PHP Testing](https://pestphp.com/docs/introduction)
+-   [Docker Docs](https://docs.docker.com/)
 
-php artisan storage:link
+---
 
-docker compose exec app php artisan migrate --force
+**License:** MIT
 
-## App Features
+---
 
--   Role-based dashboards and navigation for Admin, Receptionist, Manager, and Operator.
--   Powerful list screens with:
-    -   Search, sort, and sticky page size (10/25/50/100).
-    -   Advanced filters (Orders: status, date range, customer, operator).
-    -   Clear empty states when no results or no matches.
-    -   CSV/Excel (CSV fallback) and PDF (print-friendly HTML) export that honor current filters for: Orders, Users, Customers, Services, Pricing, Purchases, and Stock Transfers.
+## Environment
 
-### Export usage
+-   Use `.env.example.production` as the reference for all required variables. It contains examples for production (originally Heroku). Copy it to `.env` and adjust values for local/Docker.
+-   For Docker local development, typical DB values:
+    -   `DB_CONNECTION=mysql`
+    -   `DB_HOST=db` (service name from `docker-compose.yml`)
+    -   `DB_PORT=3306`
+    -   `DB_DATABASE=shebar_laundry`
+    -   `DB_USERNAME` / `DB_PASSWORD` per your `.env` or compose defaults
+-   Queues default to the `database` driver. Migrations include `jobs`, `failed_jobs`, and `job_batches` tables.
+-   Broadcasting defaults to `log`. Set to `pusher` when enabling real-time notifications.
+-   Mail defaults to `log`. Configure SMTP to send real emails.
 
--   On any index page listed above, set filters, then click one of:
-    -   Export CSV
-    -   Export Excel (generates CSV with .csv; openable in Excel)
-    -   Export PDF (opens printable HTML in a new tab; use your browser Print to save as PDF)
+## Queues & Scheduler
 
-Note: Exports include all rows that match the current filters (not just the current page).
+-   Docker services:
+    -   `worker`: runs `php artisan queue:work --sleep=3 --tries=3 --max-time=3600`
+    -   `scheduler`: runs `php artisan schedule:work`
+-   You can run these manually if needed:
+
+```bash
+docker compose exec app php artisan queue:work
+docker compose exec app php artisan schedule:work
+```
+
+## Mail
+
+Configure SMTP in `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your@email
+MAIL_PASSWORD=your-app-password
+MAIL_FROM_ADDRESS=your@email
+MAIL_FROM_NAME="Shebar Laundry"
+```
+
+For development, use `MAIL_MAILER=log` to write emails to storage logs instead of sending.
+
+## Broadcasting (Realtime)
+
+Enable Pusher in `.env`:
+
+```env
+BROADCAST_DRIVER=pusher
+PUSHER_APP_ID=your-app-id
+PUSHER_APP_KEY=your-app-key
+PUSHER_APP_SECRET=your-app-secret
+PUSHER_APP_CLUSTER=ap2
+PUSHER_SCHEME=https
+PUSHER_HOST=
+PUSHER_PORT=
+
+VITE_APP_NAME="Shebar Laundry"
+VITE_PUSHER_APP_KEY=your-app-key
+VITE_PUSHER_APP_CLUSTER=ap2
+VITE_PUSHER_SCHEME=https
+VITE_PUSHER_HOST=
+VITE_PUSHER_PORT=
+```
+
+## Seeding & Default Access
+
+`php artisan db:seed` runs:
+
+-   `RolePermissionSeeder` — roles and granular permissions
+-   `AddServiceWorkflowPermissionsSeeder` — workflow-related permissions
+-   `InitialDataSeeder` — units, services, cloth items, urgency tiers, pricing, stores, inventory, system settings, and an Admin user
+
+Default Admin user:
+
+-   Email: `admin@shebarlaundry.com`
+-   Password: `password`
+
+## Health Check
+
+-   Health endpoint: `GET /healthz` returns `{ status: "ok" }` for uptime checks.
