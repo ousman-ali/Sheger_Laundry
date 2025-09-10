@@ -1,0 +1,77 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: shebarlaundry/app:latest
+        restart: unless-stopped
+        env_file:
+            - .env
+        volumes:
+            - .:/var/www
+            - ./storage:/var/www/storage
+        depends_on:
+            - db
+        networks:
+            - shebarnet
+
+    nginx:
+        image: nginx:1.27-alpine
+        restart: unless-stopped
+        ports:
+            - "80:80"
+        volumes:
+            - .:/var/www
+            - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+        depends_on:
+            - app
+        networks:
+            - shebarnet
+
+    worker:
+        image: shebarlaundry/app:latest
+        restart: unless-stopped
+        env_file:
+            - .env
+        command: sh -lc "php artisan queue:work --sleep=3 --tries=3 --max-time=3600"
+        volumes:
+            - .:/var/www
+            - ./storage:/var/www/storage
+        depends_on:
+            - db
+        networks:
+            - shebarnet
+
+    scheduler:
+        image: shebarlaundry/app:latest
+        restart: unless-stopped
+        env_file:
+            - .env
+        command: sh -lc "php artisan schedule:work"
+        volumes:
+            - .:/var/www
+            - ./storage:/var/www/storage
+        depends_on:
+            - db
+        networks:
+            - shebarnet
+
+    db:
+        image: mysql:8.0
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me}
+            MYSQL_DATABASE: ${DB_DATABASE:-shebar_laundry}
+            MYSQL_USER: ${DB_USERNAME:-shebarlaundry}
+            MYSQL_PASSWORD: ${DB_PASSWORD:-change-me}
+        volumes:
+            - db_data:/var/lib/mysql
+        networks:
+            - shebarnet
+
+volumes:
+    db_data:
+
+networks:
+    shebarnet:
+        driver: bridge

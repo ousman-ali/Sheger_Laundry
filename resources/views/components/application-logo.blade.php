@@ -1,0 +1,1 @@
+<img src="{{ \App\Models\SystemSetting::getValue('company_logo_url', asset('logo.png')) }}" alt="{{ \App\Models\SystemSetting::getValue('company_name', config('app.name', 'Sheger Automatic Laundry')) }}" {{ $attributes->merge(['class' => 'h-16 w-auto']) }} />

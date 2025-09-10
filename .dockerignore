@@ -1,0 +1,8 @@
+node_modules
+vendor
+.env
+.git
+.gitignore
+docker-compose.override.yml
+*.log
+.env.example
