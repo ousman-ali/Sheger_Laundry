@@ -329,7 +329,14 @@ class ReportingService
     public function getTopCustomers(int $limit = 5): array
     {
         return Customer::select(
-            'customers.*',
+            'customers.id',
+            'customers.code',
+            'customers.name',
+            'customers.phone',
+            'customers.address',
+            'customers.is_vip',
+            'customers.created_at',
+            'customers.updated_at',
             DB::raw('COUNT(orders.id) as total_orders'),
             DB::raw('SUM(orders.total_cost) as total_revenue')
         )
