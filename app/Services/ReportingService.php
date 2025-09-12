@@ -326,17 +326,17 @@ class ReportingService
             ->get();
     }
 
-    public function getTopCustomers(int $limit = 5): array
+   public function getTopCustomers(int $limit = 5): array
     {
         return Customer::select(
             'customers.id',
-            'customers.code',
-            'customers.name',
-            'customers.phone',
-            'customers.address',
-            'customers.is_vip',
-            'customers.created_at',
-            'customers.updated_at',
+            DB::raw('ANY_VALUE(customers.code) as code'),
+            DB::raw('ANY_VALUE(customers.name) as name'),
+            DB::raw('ANY_VALUE(customers.phone) as phone'),
+            DB::raw('ANY_VALUE(customers.address) as address'),
+            DB::raw('ANY_VALUE(customers.is_vip) as is_vip'),
+            DB::raw('ANY_VALUE(customers.created_at) as created_at'),
+            DB::raw('ANY_VALUE(customers.updated_at) as updated_at'),
             DB::raw('COUNT(orders.id) as total_orders'),
             DB::raw('SUM(orders.total_cost) as total_revenue')
         )
