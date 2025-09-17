@@ -14,6 +14,7 @@
                                 <th class="p-2 text-left">When</th>
                                 <th class="p-2 text-left">Order</th>
                                 <th class="p-2 text-left">Customer</th>
+                                <th class="p-2 text-left">Close Item</th>
                                 <th class="p-2 text-left">Service</th>
                                 <th class="p-2 text-left">My Qty</th>
                                 <th class="p-2 text-left">Status</th>
@@ -26,6 +27,7 @@
                                     <td class="p-2">{{ $svc->orderItem->order->order_id }}</td>
                                     <td class="p-2">{{ $svc->orderItem->order->customer->name }}</td>
                                     <td class="p-2">{{ $svc->service->name }}</td>
+                                    <td class="p-2">{{ $svc->orderItem->clothItem->name }}</td>
                                     @php
                                         $mine = number_format($svc->assignedQuantityForEmployee(auth()->id()), 2);
                                         $total = number_format((float)$svc->quantity, 2);

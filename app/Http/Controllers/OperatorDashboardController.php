@@ -56,7 +56,7 @@ class OperatorDashboardController extends Controller
     public function my(Request $request)
     {
         $userId = Auth::id();
-        $services = OrderItemService::with(['orderItem.order.customer','service','assignments.employee'])
+        $services = OrderItemService::with(['orderItem.order.customer', 'orderItem.clothItem','service','assignments.employee'])
             ->where(function($w) use ($userId){
                 $w->where('employee_id', $userId)
                   ->orWhereHas('assignments', function($q) use ($userId){
