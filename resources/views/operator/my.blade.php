@@ -26,8 +26,8 @@
                                     <td class="p-2 text-sm text-gray-600">{{ $svc->updated_at->diffForHumans() }}</td>
                                     <td class="p-2">{{ $svc->orderItem->order->order_id }}</td>
                                     <td class="p-2">{{ $svc->orderItem->order->customer->name }}</td>
-                                    <td class="p-2">{{ $svc->service->name }}</td>
                                     <td class="p-2">{{ $svc->orderItem->clothItem->name }}</td>
+                                    <td class="p-2">{{ $svc->service->name }}</td>
                                     @php
                                         $mine = number_format($svc->assignedQuantityForEmployee(auth()->id()), 2);
                                         $total = number_format((float)$svc->quantity, 2);
