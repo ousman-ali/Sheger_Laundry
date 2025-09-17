@@ -333,7 +333,7 @@
 
        public function create()
        {
-        $customers = Customer::all();
+           $customers = Customer::all();
            // Only show cloth items that have at least one pricing tier to avoid error-prone selections
            $clothItems = ClothItem::with('unit')
                ->whereHas('pricingTiers')
@@ -342,7 +342,14 @@
            $services = Service::all();
            $urgencyTiers = UrgencyTier::all();
            $units = Unit::all();
-           return view('orders.create', compact('customers', 'clothItems', 'services', 'urgencyTiers', 'units'));
+           // Build cloth_item_id => [service_id] mapping for client-side filtering
+           $pricingServiceMap = PricingTier::query()
+               ->select(['cloth_item_id','service_id'])
+               ->get()
+               ->groupBy('cloth_item_id')
+               ->map(fn($rows) => $rows->pluck('service_id')->unique()->values())
+               ->toArray();
+           return view('orders.create', compact('customers', 'clothItems', 'services', 'urgencyTiers', 'units', 'pricingServiceMap'));
        }
 
        public function store(OrderStoreRequest $request)
