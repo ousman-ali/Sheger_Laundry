@@ -328,6 +328,8 @@
     </div>
 
     <script>
+        // Map of cloth_item_id => array of allowed service_ids (pricing tiers)
+        const PRICING_SERVICE_MAP = @json($pricingServiceMap ?? []);
         function customerSelect() {
             return {
                 query: '',
@@ -424,14 +426,48 @@
             const selectEl = e.target;
             if (!(selectEl.name && selectEl.name.endsWith('[cloth_item_id]'))) return;
             const clothId = selectEl.value;
+            const itemWrapper = selectEl.closest('.item');
             const rootId = CLOTH_ROOTS[clothId] || '';
-            const unitSelect = selectEl.closest('.item')?.querySelector('select[name$="[unit_id]"]');
+            const unitSelect = itemWrapper?.querySelector('select[name$="[unit_id]"]');
             if (unitSelect) {
                 populateUnitOptions(unitSelect, rootId);
                 const defUnit = CLOTH_UNIT_IDS[clothId];
                 if (defUnit && [...unitSelect.options].some(o => o.value === String(defUnit))) {
                     unitSelect.value = String(defUnit);
                 }
+            }
+            filterServicesForItem(itemWrapper, clothId);
+        }
+
+        function filterServicesForItem(itemWrapper, clothId) {
+            if (!itemWrapper) return;
+            const allowed = (PRICING_SERVICE_MAP[clothId] || []).map(id => parseInt(id,10));
+            const lines = itemWrapper.querySelectorAll('[data-service-line]');
+            let visibleCount = 0;
+            lines.forEach(line => {
+                const sid = parseInt(line.getAttribute('data-service-id'), 10);
+                const show = allowed.includes(sid);
+                line.style.display = show ? '' : 'none';
+                if (!show) {
+                    // Clear any selections/inputs if hidden
+                    const cb = line.querySelector('input[type="checkbox"]'); if (cb) cb.checked = false;
+                    const qty = line.querySelector('input[type="number"]'); if (qty) qty.value='';
+                } else { visibleCount++; }
+            });
+            // Message handling
+            let msg = itemWrapper.querySelector('.no-priced-services-msg');
+            if (!msg) {
+                msg = document.createElement('div');
+                msg.className = 'no-priced-services-msg text-xs text-amber-600 mt-2';
+                const svcTable = itemWrapper.querySelector('[data-services-wrapper]');
+                svcTable?.parentNode?.appendChild(msg);
+            }
+            if (clothId && visibleCount === 0) {
+                msg.textContent = 'No priced services available for this cloth item.';
+                msg.style.display = '';
+            } else {
+                msg.textContent = '';
+                msg.style.display = 'none';
             }
         }
 
@@ -544,7 +580,7 @@
             inp.setAttribute('name', `items[${itemIndex}][remark_preset_ids][]`);
         });
         const clothSel = newRow?.querySelector('select[name$="[cloth_item_id]"]');
-        if (clothSel && clothSel.value) {
+        if (clothSel) {
             const evt = new Event('change', { bubbles: true });
             clothSel.dispatchEvent(evt);
         }
@@ -615,6 +651,10 @@
             const fromItem = document.querySelector(`.item[data-item-index="${fromIndex}"]`);
             const toItem = document.querySelector(`.item[data-item-index="${toIndex}"]`);
             if (!fromItem || !toItem) return;
+            // Prevent copying services not priced for destination cloth item
+            const clothSelect = toItem.querySelector('select[name$="[cloth_item_id]"]');
+            const clothId = clothSelect ? clothSelect.value : null;
+            const allowed = (PRICING_SERVICE_MAP[clothId] || []).map(i=>parseInt(i,10));
             const fromRows = fromItem.querySelectorAll('[data-service-line]');
             const toRows = toItem.querySelectorAll('[data-service-line]');
             const fromMap = new Map();
@@ -626,6 +666,7 @@
                 const id = r.getAttribute('data-service-id');
                 const src = id ? fromMap.get(id) : null;
                 if (!src) return;
+                if (clothId && allowed.length && !allowed.includes(parseInt(id,10))) { return; }
                 const srcCheck = src.querySelector('input[type="checkbox"]');
                 const dstCheck = r.querySelector('input[type="checkbox"]');
                 if (srcCheck && dstCheck) dstCheck.checked = srcCheck.checked;
@@ -636,16 +677,15 @@
                 const dstUrg = r.querySelector('select');
                 if (srcUrg && dstUrg) dstUrg.value = srcUrg.value;
             });
+            filterServicesForItem(toItem, clothId);
         }
 
         // Initial setup
         refreshCopyOptions();
-        // For first row, if a cloth item is preselected, filter units immediately
+        // For first row and any preselected cloth items, trigger service filtering
         document.querySelectorAll('select[name$="[cloth_item_id]"]').forEach(sel => {
-            if (sel.value) {
-                const evt = new Event('change', { bubbles: true });
-                sel.dispatchEvent(evt);
-            }
+            const evt = new Event('change', { bubbles: true });
+            sel.dispatchEvent(evt);
         });
     </script>
 </x-app-layout>
