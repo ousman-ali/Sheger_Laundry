@@ -18,7 +18,7 @@
                     @endif
                     <p>{{ $order->remarks }}</p>
                 </div>
-                
+
 
                 <div class="mb-6" x-data="{ q: '' }">
                     <div class="flex items-center justify-between mb-2">
@@ -88,7 +88,7 @@
                                                     <button class="text-xs bg-slate-600 text-white px-2 py-1 rounded">Assign item</button>
                                                 </div>
                                             </form>
-                                            
+
                         <form action="{{ route('order-services.assign') }}" method="POST" class="mb-2">
                                                 @csrf
                                                 <div class="flex items-center gap-2">
@@ -133,7 +133,7 @@
                                                 </div>
                                             </form>
                                             @endcan
-                                            
+
                                             @php
                                                 $user = auth()->user();
                                                 $visibleServices = collect($item->orderItemServices);
@@ -145,7 +145,7 @@
                                                     })->values();
                                                 }
                                             @endphp
-                                            @if(auth()->user() && auth()->user()->hasRole('Admin'))
+                                            @if(auth()->user() && (auth()->user()->hasRole('Admin')||auth()->user()->can('assign_service')))
                                                 <div class="mt-2 grid grid-cols-1 gap-1">
                                                     @foreach ($item->orderItemServices as $svc)
                                                         <div class="text-xs text-gray-600">
