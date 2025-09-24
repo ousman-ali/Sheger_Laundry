@@ -11,7 +11,7 @@
                 <h1 class="text-2xl font-bold mb-4">Create Order</h1>
                 <form action="{{ route('orders.store') }}" method="POST">
                     @csrf
-                    @role('Admin')
+                    @role('Admin')  
                     <div class="mb-4">
                         <label for="order_id" class="block text-sm font-medium">Order ID (optional override)</label>
                         <input type="text" name="order_id" id="order_id" value="{{ old('order_id') }}" class="w-full border rounded p-2" placeholder="Leave blank to auto-generate">
@@ -21,17 +21,7 @@
                         @enderror
                     </div>
                     @endrole
-                    {{-- Hidden template for item-level remark presets checkboxes --}}
-                    <template id="item-remark-presets-tpl">
-                        <div class="flex flex-wrap gap-2 mb-2">
-                            @foreach(\App\Models\RemarkPreset::where('is_active', true)->orderBy('sort_order')->orderBy('label')->get() as $rp)
-                                <label class="inline-flex items-center gap-2 border rounded px-2 py-1 text-xs">
-                                    <input type="checkbox" data-item-remark-preset value="{{ $rp->id }}" class="rounded">
-                                    <span>{{ $rp->label }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </template>
+                    
                     @php
                         // Maps to support client-side unit filtering by cloth item's unit root
                         $unitRootIds = [];
@@ -48,13 +38,16 @@
                             $clothRootIds[$ci->id] = $root ? $root->id : ($ci->unit->id ?? null);
                             $clothUnitIds[$ci->id] = $ci->unit_id;
                         }
+                        
+                        // Get remark presets for template generation
+                        $remarkPresets = \App\Models\RemarkPreset::where('is_active', true)->orderBy('sort_order')->orderBy('label')->get();
                     @endphp
 
                     <div class="mb-4">
                         <label for="customer_id" class="block text-sm font-medium">Customer</label>
                         <div x-data="customerSelect()" class="relative" x-init="init()" @click.outside="closeList()">
                             <div class="flex gap-2">
-                            <div class="flex-1 relative">
+                                <div class="flex-1 relative">
                                     <input type="hidden" name="customer_id" x-model="selectedId" required>
                                     <input
                                         type="text"
@@ -243,8 +236,8 @@
                             <div class="mb-3">
                                 <label class="block text-sm font-medium">Remarks</label>
                                 <div class="mb-1 text-xs text-gray-600">Common remarks (this item)</div>
-                                <div class="flex flex-wrap gap-2 mb-2">
-                                    @foreach(\App\Models\RemarkPreset::where('is_active', true)->orderBy('sort_order')->orderBy('label')->get() as $rp)
+                                <div class="flex flex-wrap gap-2 mb-2" id="item-remarks-0">
+                                    @foreach($remarkPresets as $rp)
                                         <label class="inline-flex items-center gap-2 border rounded px-2 py-1 text-xs">
                                             <input type="checkbox" name="items[0][remark_preset_ids][]" value="{{ $rp->id }}" class="rounded">
                                             <span>{{ $rp->label }}</span>
@@ -254,7 +247,7 @@
                                 <textarea name="items[0][remarks]" class="w-full border rounded p-2" placeholder="Item-specific remarks..."></textarea>
                             </div>
                             <div class="services-panel">
-                                    <h3 class="text-sm font-semibold mb-2 flex items-center justify-between">Services (manual mode)
+                                <h3 class="text-sm font-semibold mb-2 flex items-center justify-between">Services (manual mode)
                                     <span class="flex items-center gap-2">
                                         <button type="button" class="item-select-all text-xs text-blue-600 underline">Select all</button>
                                         <button type="button" class="item-select-none text-xs text-blue-600 underline">Select none</button>
@@ -297,27 +290,29 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium">Order Received Date & Time</label>
-                                <input type="datetime-local" name="appointment_date" value="{{ old('appointment_date', now()->format('Y-m-d\\TH:i')) }}" class="w-full border rounded p-2">
-                                <p class="text-xs text-gray-500 mt-1">Defaults to current time (when the order is created); you can edit this to record a different received time.</p>
+                            <input type="datetime-local" name="appointment_date" value="{{ old('appointment_date', now()->format('Y-m-d\\TH:i')) }}" class="w-full border rounded p-2">
+                            <p class="text-xs text-gray-500 mt-1">Defaults to current time (when the order is created); you can edit this to record a different received time.</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium">Pickup Date</label>
                             <input type="datetime-local" name="pickup_date" class="w-full border rounded p-2">
                         </div>
                     </div>
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium">Remarks</label>
-                                <div class="mb-2 text-xs text-gray-600">Common remarks</div>
-                                <div class="flex flex-wrap gap-2 mb-2">
-                                    @foreach(\App\Models\RemarkPreset::where('is_active', true)->orderBy('sort_order')->orderBy('label')->get() as $rp)
-                                        <label class="inline-flex items-center gap-2 border rounded px-2 py-1 text-xs">
-                                            <input type="checkbox" name="remark_preset_ids[]" value="{{ $rp->id }}" class="rounded">
-                                            <span>{{ $rp->label }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                                <textarea name="remarks" class="w-full border rounded p-2" placeholder="Additional free-text remarks..."></textarea>
-                            </div>
+                    
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium">Remarks</label>
+                        <div class="mb-2 text-xs text-gray-600">Common remarks</div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            @foreach($remarkPresets as $rp)
+                                <label class="inline-flex items-center gap-2 border rounded px-2 py-1 text-xs">
+                                    <input type="checkbox" name="remark_preset_ids[]" value="{{ $rp->id }}" class="rounded">
+                                    <span>{{ $rp->label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <textarea name="remarks" class="w-full border rounded p-2" placeholder="Additional free-text remarks..."></textarea>
+                    </div>
+                    
                     <div class="flex gap-2">
                         <a href="{{ route('orders.index') }}" class="px-4 py-2 rounded border">Cancel</a>
                         <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded">Create Order</button>
@@ -330,6 +325,7 @@
     <script>
         // Map of cloth_item_id => array of allowed service_ids (pricing tiers)
         const PRICING_SERVICE_MAP = @json($pricingServiceMap ?? []);
+        
         function customerSelect() {
             return {
                 query: '',
@@ -403,13 +399,16 @@
                 }
             }
         }
+        
         let itemIndex = 0;
-    const servicesList = @json($services->map(fn($s)=>['id'=>$s->id,'name'=>$s->name]));
+        const servicesList = @json($services->map(fn($s)=>['id'=>$s->id,'name'=>$s->name]));
         const urgencyOptions = `@foreach($urgencyTiers as $tier)<option value="{{ $tier->id }}">{{ $tier->label }}</option>@endforeach`;
-    const UNITS = @json($units->map(fn($u) => [ 'id' => $u->id, 'name' => $u->name, 'root_id' => $unitRootIds[$u->id] ?? null ]));
-    const CLOTH_ROOTS = @json($clothRootIds);
-    const CLOTH_UNIT_IDS = @json($clothUnitIds);
-    const ITEM_REMARKS_HTML = document.getElementById('item-remark-presets-tpl').innerHTML;
+        const UNITS = @json($units->map(fn($u) => [ 'id' => $u->id, 'name' => $u->name, 'root_id' => $unitRootIds[$u->id] ?? null ]));
+        const CLOTH_ROOTS = @json($clothRootIds);
+        const CLOTH_UNIT_IDS = @json($clothUnitIds);
+        
+        // Generate remark presets HTML server-side
+        const remarkPresetsHTML = `@foreach($remarkPresets as $rp)<label class="inline-flex items-center gap-2 border rounded px-2 py-1 text-xs"><input type="checkbox" name="items[INDEX][remark_preset_ids][]" value="{{ $rp->id }}" class="rounded"><span>{{ $rp->label }}</span></label>@endforeach`;
 
         function populateUnitOptions(unitSelect, rootId) {
             const current = unitSelect.value;
@@ -511,12 +510,30 @@
             });
         }
 
-    document.querySelector('.add-item').addEventListener('click', () => {
+        document.querySelector('.add-item').addEventListener('click', () => {
             itemIndex++;
             const wrapper = document.getElementById('items-container');
+            
+            // Create remark presets HTML with proper item index
+            const remarksHtml = remarkPresetsHTML.replace(/INDEX/g, itemIndex);
+            
             const lines = servicesList.map(s => `
-        <div class=\"flex flex-wrap items-center gap-2 border rounded p-2 bg-gray-50\" data-service-line data-service-id=\"${s.id}\">\n                    <label class=\"inline-flex items-center gap-1 mr-2\">\n                        <input type=\"checkbox\" name=\"items[${itemIndex}][services][${s.id}][selected]\" value=\"1\" class=\"svc-check\">\n                        <span class=\"text-xs font-medium\">${s.name}</span>\n                    </label>\n                    <div class=\"flex items-center gap-1\">\n                        <span class=\"text-[11px] text-gray-500\">Qty</span>\n                        <input type=\"number\" step=\"0.01\" name=\"items[${itemIndex}][services][${s.id}][quantity]\" class=\"w-20 border rounded p-1 text-xs\" placeholder=\"auto\">\n                    </div>\n                    <div class=\"flex items-center gap-1\">\n                        <span class=\"text-[11px] text-gray-500\">Urgency</span>\n                        <select name=\"items[${itemIndex}][services][${s.id}][urgency_tier_id]\" class=\"border rounded p-1 text-xs\"><option value=\"\">Item/Global</option>${urgencyOptions}</select>\n                    </div>\n                </div>`).join('');
-        const html = `<div class="item border p-4 rounded" data-item-index="${itemIndex}">
+                <div class="flex flex-wrap items-center gap-2 border rounded p-2 bg-gray-50" data-service-line data-service-id="${s.id}">
+                    <label class="inline-flex items-center gap-1 mr-2">
+                        <input type="checkbox" name="items[${itemIndex}][services][${s.id}][selected]" value="1" class="svc-check">
+                        <span class="text-xs font-medium">${s.name}</span>
+                    </label>
+                    <div class="flex items-center gap-1">
+                        <span class="text-[11px] text-gray-500">Qty</span>
+                        <input type="number" step="0.01" name="items[${itemIndex}][services][${s.id}][quantity]" class="w-20 border rounded p-1 text-xs" placeholder="auto">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="text-[11px] text-gray-500">Urgency</span>
+                        <select name="items[${itemIndex}][services][${s.id}][urgency_tier_id]" class="border rounded p-1 text-xs"><option value="">Item/Global</option>${urgencyOptions}</select>
+                    </div>
+                </div>`).join('');
+            
+            const html = `<div class="item border p-4 rounded" data-item-index="${itemIndex}">
                 <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <h3 class="text-sm font-semibold text-gray-800">Item</h3>
                     <div class="flex items-center gap-2">
@@ -559,31 +576,36 @@
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Remarks</label>
                     <div class="mb-1 text-xs text-gray-600">Common remarks (this item)</div>
-                    <!-- Injected from template: item-level remark presets checkboxes -->
-                    <div class="item-remark-presets">
-                        ${ITEM_REMARKS_HTML}
+                    <div class="flex flex-wrap gap-2 mb-2" id="item-remarks-${itemIndex}">
+                        ${remarksHtml}
                     </div>
                     <textarea name="items[${itemIndex}][remarks]" class="w-full border rounded p-2" placeholder="Item-specific remarks..."></textarea>
                 </div>
                 <div class="services-panel">
-                    <h3 class="text-sm font-semibold mb-2">Services (manual mode)</h3>
+                    <h3 class="text-sm font-semibold mb-2 flex items-center justify-between">Services (manual mode)
+                        <span class="flex items-center gap-2">
+                            <button type="button" class="item-select-all text-xs text-blue-600 underline">Select all</button>
+                            <button type="button" class="item-select-none text-xs text-blue-600 underline">Select none</button>
+                            <button type="button" class="item-clear text-xs text-slate-700 underline">Clear</button>
+                            <button type="button" class="text-xs text-blue-600 underline add-svc-row" data-item="${itemIndex}">Add custom row</button>
+                        </span>
+                    </h3>
                     <div class="service-table space-y-2" data-services-wrapper>${lines}</div>
                 </div>
             </div>`;
+            
             wrapper.insertAdjacentHTML('beforeend', html);
             toggleModes();
-        refreshCopyOptions();
-        // Initialize unit options on the newly inserted row if a cloth is preselected
-        const newRow = wrapper.querySelector('.item:last-of-type');
-        // Bind remark preset checkbox names for this item row
-        newRow?.querySelectorAll('[data-item-remark-preset]')?.forEach(inp => {
-            inp.setAttribute('name', `items[${itemIndex}][remark_preset_ids][]`);
-        });
-        const clothSel = newRow?.querySelector('select[name$="[cloth_item_id]"]');
-        if (clothSel) {
-            const evt = new Event('change', { bubbles: true });
-            clothSel.dispatchEvent(evt);
-        }
+            initClothSelects();
+            refreshCopyOptions();
+            
+            // Initialize the new item
+            const newRow = wrapper.querySelector('.item:last-of-type');
+            const clothSel = newRow?.querySelector('select[name$="[cloth_item_id]"]');
+            if (clothSel) {
+                const evt = new Event('change', { bubbles: true });
+                clothSel.dispatchEvent(evt);
+            }
         });
 
         // Remove item handler with safeguard to keep at least one item
