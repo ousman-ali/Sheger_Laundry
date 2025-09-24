@@ -9,6 +9,7 @@ use App\Models\PricingTier;
 use App\Models\UrgencyTier;
 use App\Models\ActivityLog;
 use App\Models\Notification;
+use App\Models\OrderServiceAssignment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -185,6 +186,40 @@ class OrderService
      * If quantity is null, assigns the remaining unassigned quantity to the employee.
      * Clamps to remaining quantity; creates/updates an assignment row per employee.
      */
+    public function autoAssignItemServices(OrderItem $orderItem): void
+    {
+        // 1. Load cloth item with its clothing group
+        $clothItem = $orderItem->clothItem()->with('clothingGroup')->first();
+
+        // 2. Ensure cloth item, group, and user exist
+        if (!$clothItem || !$clothItem->clothingGroup || !$clothItem->clothingGroup->user_id) {
+            return; // Skip if no employee is linked
+        }
+
+        $employeeId = $clothItem->clothingGroup->user_id;
+
+        // 3. Loop through all order item services
+        foreach ($orderItem->orderItemServices as $service) {
+            // prevent duplicate assignments
+            $alreadyAssigned = $service->assignments()
+                ->where('employee_id', $employeeId)
+                ->exists();
+
+            if (!$alreadyAssigned) {
+                // 4. Create assignment record
+                OrderServiceAssignment::create([
+                    'order_item_service_id' => $service->id,
+                    'employee_id'           => $employeeId,
+                    'quantity'              => $service->quantity,
+                    'status'                => 'assigned',
+                ]);
+
+                // 5. Update service status
+                $service->update(['status' => 'assigned']);
+            }
+        }
+    }
+
     public function assignEmployee(OrderItemService $service, ?int $employeeId, ?float $quantity = null): OrderItemService
     {
         // If no employee provided, nothing to assign (could be extendable to unassign in the future)

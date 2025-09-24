@@ -56,7 +56,7 @@
                             <tbody>
                                 @foreach ($order->orderItems as $item)
                                     <tr class="border-b align-top">
-                                        <td class="p-2">{{ $item->clothItem->name }}</td>
+                                        <td class="p-2">({{ $item->clothItem->item_code }}) {{ $item->clothItem->name }}</td>
                                         <td class="p-2">{{ $item->unit->name }}</td>
                                         <td class="p-2">{{ $item->quantity }}
                                             @php $itemLabels = $item->remarkPresets->pluck('label')->all(); @endphp

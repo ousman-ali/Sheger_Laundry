@@ -357,11 +357,23 @@
            $validated = $request->validated();
            try {
                $order = $this->orderService->createOrder($validated); // removed extra auth user param
+
+               // Ensure orderItems and their services are loaded
+                $order->load(['orderItems.orderItemServices', 'orderItems.clothItem.clothingGroup']);
+
+                // Only loop if we have items
+                if ($order->orderItems && $order->orderItems->count() > 0) {
+                    foreach ($order->orderItems as $orderItem) {
+                        $this->orderService->autoAssignItemServices($orderItem);
+                    }
+                }
+
                // Sync common remark presets selections
                if (!empty($validated['remark_preset_ids']) && is_array($validated['remark_preset_ids'])) {
                    $ids = array_values(array_unique(array_map('intval', $validated['remark_preset_ids'])));
                    $order->remarkPresets()->sync($ids);
                }
+               
                return redirect()->route('orders.show', $order)->with('success', 'Order created successfully.');
            } catch (\Throwable $e) {
                Log::error('Order creation failed', [

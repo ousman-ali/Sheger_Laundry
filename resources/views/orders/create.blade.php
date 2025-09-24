@@ -551,7 +551,7 @@
                         <select name="items[${itemIndex}][cloth_item_id]" class="w-full border rounded p-2 cloth-select" required>
                             <option value="">Select Item</option>
                             @foreach ($clothItems as $item)
-                                <option value="{{ $item->id }}">{{ $item->name }} ({{ $item->unit->name }})</option>
+                                <option value="{{ $item->id }}">{{ $item->item_code }} {{ $item->name }} ({{ $item->unit->name }})</option>
                             @endforeach
                         </select>
                     </div>

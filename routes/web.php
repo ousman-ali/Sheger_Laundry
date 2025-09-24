@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClothingGroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
@@ -202,6 +203,9 @@ Route::middleware('auth')->group(function () {
 
     // Banks (Admin)
     Route::resource('banks', \App\Http\Controllers\BankController::class)->middleware('role:Admin');
+
+    //cloth-groups
+    Route::resource('clothing-groups', ClothingGroupController::class);
 
     // Cloth Items
     Route::resource('cloth-items', ClothItemController::class);

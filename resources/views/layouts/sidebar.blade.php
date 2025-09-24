@@ -141,6 +141,14 @@
                 <svg x-show="!sidebarCollapsed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-auto transform transition" :class="openCatalog ? 'rotate-90' : ''" viewBox="0 0 20 20" fill="currentColor"><path d="M7 5l6 5-6 5V5z"/></svg>
             </button>
             <div class="mt-1 space-y-1" x-show="openCatalog" x-collapse>
+                <a href="{{ route('clothing-groups.index') }}" 
+                    title="Clothing Groups" 
+                    aria-current="{{ request()->routeIs('clothing-groups.*') ? 'page' : 'false' }}" 
+                    class="flex items-center px-3 py-2 rounded {{ request()->routeIs('clothing-groups.*') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50' }}" 
+                    :class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v2H3zM3 7h18v2H3zM3 11h18v2H3zM3 15h18v2H3z"/></svg>
+                    <span x-show="!sidebarCollapsed">Cloth Groups</span>
+                </a>
             @can('view_cloth_items')
                 <a href="{{ route('cloth-items.index') }}" title="Cloth Items" aria-current="{{ request()->routeIs('cloth-items.*') ? 'page' : 'false' }}" class="flex items-center px-3 py-2 rounded {{ request()->routeIs('cloth-items.*') ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50' }}" :class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-9 13-9-13 5-5z"/></svg>
