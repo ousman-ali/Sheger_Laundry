@@ -61,6 +61,9 @@
                             <tr class="bg-gray-100">
                                 @php $dir = request('direction','asc')==='asc'?'desc':'asc'; @endphp
                                 <th class="p-2 text-left">
+                                    <a href="{{ route('cloth-items.index', array_merge(request()->query(), ['sort' => 'item_code', 'direction' => request('sort')==='item_code' ? $dir : 'asc'])) }}" class="underline">Item Code</a>
+                                </th>
+                                <th class="p-2 text-left">
                                     <a href="{{ route('cloth-items.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => request('sort')==='name' ? $dir : 'asc'])) }}" class="underline">Name</a>
                                 </th>
                                 <th class="p-2 text-left">Unit</th>
@@ -74,6 +77,7 @@
                         <tbody>
                             @foreach ($clothItems as $item)
                                 <tr class="border-b">
+                                    <td class="p-2">{{ $item->item_code }}</td>
                                     <td class="p-2">{{ $item->name }}</td>
                                     <td class="p-2">{{ optional($item->unit)->name }}</td>
                                     <td class="p-2">{{ \Illuminate\Support\Str::limit($item->description, 80) }}</td>

@@ -134,12 +134,13 @@ class ClothItemController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'item_code'   => 'required|string|max:50|unique:cloth_items,item_code',
             'name' => 'required|string|max:255|unique:cloth_items',
             'unit_id' => 'required|exists:units,id',
             'description' => 'nullable|string',
         ]);
 
-        ClothItem::create($request->all());
+        ClothItem::create($request->only(['item_code', 'name', 'unit_id', 'description']));
 
         return redirect()->route('cloth-items.index')
             ->with('success', 'Cloth item created successfully.');
@@ -154,12 +155,13 @@ class ClothItemController extends Controller
     public function update(Request $request, ClothItem $clothItem)
     {
         $request->validate([
+            'item_code'   => 'required|string|max:50|unique:cloth_items,item_code,' . $clothItem->id,
             'name' => 'required|string|max:255|unique:cloth_items,name,' . $clothItem->id,
             'unit_id' => 'required|exists:units,id',
             'description' => 'nullable|string',
         ]);
 
-        $clothItem->update($request->all());
+        $clothItem->update($request->only(['item_code', 'name', 'unit_id', 'description']));
 
         return redirect()->route('cloth-items.index')
             ->with('success', 'Cloth item updated successfully.');

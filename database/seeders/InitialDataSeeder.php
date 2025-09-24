@@ -20,14 +20,13 @@ class InitialDataSeeder extends Seeder
     public function run(): void
     {
         // Create units
-        $kg = Unit::create(['name' => 'kg']);
-        $pcs = Unit::create(['name' => 'pcs']);
-        $liters = Unit::create(['name' => 'liters']);
-        $grams = Unit::create([
-            'name' => 'grams',
-            'parent_unit_id' => $kg->id,
-            'conversion_factor' => 1000
-        ]);
+        $kg = Unit::firstOrCreate(['name' => 'kg']);
+        $pcs = Unit::firstOrCreate(['name' => 'pcs']);
+        $liters = Unit::firstOrCreate(['name' => 'liters']);
+        $grams = Unit::firstOrCreate(
+            ['name' => 'grams'],
+            ['parent_unit_id' => $kg->id, 'conversion_factor' => 1000]
+        );
 
         // Create services
         $services = [
@@ -39,23 +38,23 @@ class InitialDataSeeder extends Seeder
         ];
 
         foreach ($services as $service) {
-            Service::create($service);
+            Service::firstOrCreate(['name' => $service['name']], $service);
         }
 
         // Create cloth items
         $clothItems = [
-            ['name' => 'T-shirt', 'unit_id' => $pcs->id, 'description' => 'Regular T-shirts'],
-            ['name' => 'Shirt', 'unit_id' => $pcs->id, 'description' => 'Formal shirts'],
-            ['name' => 'Pants', 'unit_id' => $pcs->id, 'description' => 'Trousers and pants'],
-            ['name' => 'Dress', 'unit_id' => $pcs->id, 'description' => 'Dresses and gowns'],
-            ['name' => 'Suit', 'unit_id' => $pcs->id, 'description' => 'Business suits'],
-            ['name' => 'Blanket', 'unit_id' => $pcs->id, 'description' => 'Bedding blankets'],
-            ['name' => 'Curtain', 'unit_id' => $pcs->id, 'description' => 'Window curtains'],
-            ['name' => 'Carpet', 'unit_id' => $pcs->id, 'description' => 'Floor carpets'],
+            ['item_code' => 'TSH001', 'name' => 'T-shirt', 'unit_id' => $pcs->id, 'description' => 'Regular T-shirts'],
+            ['item_code' => 'SHT001', 'name' => 'Shirt', 'unit_id' => $pcs->id, 'description' => 'Formal shirts'],
+            ['item_code' => 'PNT001', 'name' => 'Pants', 'unit_id' => $pcs->id, 'description' => 'Trousers and pants'],
+            ['item_code' => 'DRS001', 'name' => 'Dress', 'unit_id' => $pcs->id, 'description' => 'Dresses and gowns'],
+            ['item_code' => 'SUT001', 'name' => 'Suit', 'unit_id' => $pcs->id, 'description' => 'Business suits'],
+            ['item_code' => 'BLK001', 'name' => 'Blanket', 'unit_id' => $pcs->id, 'description' => 'Bedding blankets'],
+            ['item_code' => 'CUR001', 'name' => 'Curtain', 'unit_id' => $pcs->id, 'description' => 'Window curtains'],
+            ['item_code' => 'CRP001', 'name' => 'Carpet', 'unit_id' => $pcs->id, 'description' => 'Floor carpets'],
         ];
 
         foreach ($clothItems as $item) {
-            ClothItem::create($item);
+            ClothItem::firstOrCreate(['item_code' => $item['item_code']], $item);
         }
 
         // Create urgency tiers
@@ -67,7 +66,7 @@ class InitialDataSeeder extends Seeder
         ];
 
         foreach ($urgencyTiers as $tier) {
-            UrgencyTier::create($tier);
+            UrgencyTier::firstOrCreate(['label' => $tier['label']], $tier);
         }
 
         // Create pricing tiers
@@ -97,11 +96,10 @@ class InitialDataSeeder extends Seeder
                     default => 1.0,
                 };
 
-                PricingTier::create([
-                    'cloth_item_id' => $clothItem->id,
-                    'service_id' => $service->id,
-                    'price' => $basePrice * $serviceMultiplier,
-                ]);
+                PricingTier::firstOrCreate(
+                    ['cloth_item_id' => $clothItem->id, 'service_id' => $service->id],
+                    ['price' => $basePrice * $serviceMultiplier]
+                );
             }
         }
 
@@ -115,7 +113,7 @@ class InitialDataSeeder extends Seeder
         ];
 
         foreach ($stores as $store) {
-            Store::create($store);
+            Store::firstOrCreate(['name' => $store['name']], $store);
         }
 
         // Seed inventory items and initial stock in Main Store
@@ -131,7 +129,7 @@ class InitialDataSeeder extends Seeder
 
         $createdInventoryItems = [];
         foreach ($inventoryItems as $inv) {
-            $createdInventoryItems[] = InventoryItem::create($inv);
+            $createdInventoryItems[] = InventoryItem::firstOrCreate(['name' => $inv['name']], $inv);
         }
 
         $mainStore = Store::where('type', 'main')->first();
@@ -148,11 +146,10 @@ class InitialDataSeeder extends Seeder
                     default => 100,
                 };
 
-                InventoryStock::create([
-                    'inventory_item_id' => $item->id,
-                    'store_id' => $mainStore->id,
-                    'quantity' => $initialQty,
-                ]);
+                InventoryStock::firstOrCreate(
+                    ['inventory_item_id' => $item->id, 'store_id' => $mainStore->id],
+                    ['quantity' => $initialQty]
+                );
             }
         }
 
@@ -167,17 +164,19 @@ class InitialDataSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            SystemSetting::create($setting);
+            SystemSetting::firstOrCreate(['key' => $setting['key']], $setting);
         }
 
         // Create admin user
-        $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@shebarlaundry.com',
-            'password' => Hash::make('password'),
-            'phone' => '+251 911 123 456',
-            'email_verified_at' => now(),
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@shebarlaundry.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'phone' => '+251 911 123 456',
+                'email_verified_at' => now(),
+            ]
+        );
 
         $admin->assignRole('Admin');
     }

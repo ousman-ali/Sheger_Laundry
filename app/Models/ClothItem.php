@@ -11,7 +11,11 @@ class ClothItem extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name', 'unit_id', 'description',
+        'item_code',        // NEW
+        'name',
+        'unit_id',
+        'clothing_group_id', // NEW
+        'description',
     ];
 
     public function unit(): BelongsTo
@@ -27,5 +31,10 @@ class ClothItem extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function clothingGroup(): BelongsTo
+    {
+        return $this->belongsTo(ClothingGroup::class, 'clothing_group_id');
     }
 }

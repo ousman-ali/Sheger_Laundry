@@ -55,4 +55,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    public function clothingGroup()
+    {
+        return $this->hasOne(ClothingGroup::class);
+    }
 }

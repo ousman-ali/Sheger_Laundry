@@ -10,9 +10,11 @@ return new class extends Migration
     {
         Schema::create('cloth_items', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('item_code')->unique();
             $table->string('name')->unique();
             $table->unsignedBigInteger('unit_id');
             $table->text('description')->nullable();
+            $table->unsignedBigInteger('clothing_group_id')->nullable();
             $table->timestamps();
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('restrict');
         });
