@@ -26,54 +26,74 @@ class PaymentService
     public function suggestedAmountForOrder(int $orderId): array
     {
         $order = Order::findOrFail($orderId);
-        // Penalty precedence:
-        // 1) If order has explicit penalty_amount > 0, use it.
-        // 2) Else, if past pickup date and a daily rate exists, compute days late * daily rate.
-        // 0) Itemized penalties take precedence when present (sum of non-waived)
+
+        // --- Penalty precedence ---
         $itemizedPenalty = (float) ($order->itemPenalties()->where('waived', false)->sum('amount'));
         $explicitPenalty = (float)($order->penalty_amount ?? 0);
+
         $penalty = $itemizedPenalty > 0
             ? $itemizedPenalty
             : ($explicitPenalty > 0
                 ? $explicitPenalty
                 : (function () use ($order) {
-                // Enable toggle and grace days
-                $enabled = (int)(optional(SystemSetting::where('key','penalties_enabled')->first())->value ?? 1);
-                if ($enabled !== 1) { return 0.0; }
-                $grace = (int)(optional(SystemSetting::where('key','penalty_grace_days')->first())->value ?? 0);
-                // Determine per-day rate: prefer service-level max override across services in the order
-                $defaultRate = (float)($order->penalty_daily_rate
-                    ?? optional(SystemSetting::where('key','penalty_daily_rate')->first())->value
-                    ?? config('shebar.penalty_daily_rate', 0));
-                $perDay = $defaultRate;
-                try {
-                    $serviceIds = $order->orderItemServices()->pluck('service_id')->unique()->all();
-                    $overrides = [];
-                    foreach ($serviceIds as $sid) {
-                        $v = optional(SystemSetting::where('key','penalty_rate_service_'.$sid)->first())->value;
-                        if ($v !== null && $v !== '') { $overrides[] = (float)$v; }
+                    $enabled = (int)(optional(SystemSetting::where('key','penalties_enabled')->first())->value ?? 1);
+                    if ($enabled !== 1) { return 0.0; }
+
+                    $grace = (int)(optional(SystemSetting::where('key','penalty_grace_days')->first())->value ?? 0);
+
+                    $defaultRate = (float)($order->penalty_daily_rate
+                        ?? optional(SystemSetting::where('key','penalty_daily_rate')->first())->value
+                        ?? config('shebar.penalty_daily_rate', 0));
+
+                    $perDay = $defaultRate;
+
+                    // Check for service-level overrides
+                    try {
+                        $serviceIds = $order->orderItemServices()->pluck('service_id')->unique()->all();
+                        $overrides = [];
+                        foreach ($serviceIds as $sid) {
+                            $v = optional(SystemSetting::where('key','penalty_rate_service_'.$sid)->first())->value;
+                            if ($v !== null && $v !== '') { $overrides[] = (float)$v; }
+                        }
+                        if (!empty($overrides)) { $perDay = max($overrides); }
+                    } catch (\Throwable $_) { /* ignore */ }
+
+                    if (!empty($order->pickup_date) && $perDay > 0) {
+                        $start = $order->pickup_date->copy()->startOfDay()->addDays(max(0,$grace));
+                        $daysLate = $start->diffInDays(now()->startOfDay(), false);
+                        return max(0, $daysLate) * $perDay;
                     }
-                    if (!empty($overrides)) { $perDay = max($overrides); }
-                } catch (\Throwable $_) { /* ignore */ }
-                if (!empty($order->pickup_date) && $perDay > 0) {
-                    // Signed diff: positive when now is after pickup_date + grace
-                    $start = $order->pickup_date->copy()->startOfDay()->addDays(max(0,$grace));
-                    $daysLate = $start->diffInDays(now()->startOfDay(), false);
-                    return max(0, $daysLate) * $perDay;
-                }
-                return 0.0;
-            })());
-    // Treat total_cost as (base + explicit penalty_amount). Derive base to avoid double counting.
-    $base = max(0.0, (float)($order->total_cost ?? 0) - (float)$explicitPenalty);
-    $total = $base + $penalty;
-    $paid = (float) (Payment::query()->where('order_id',$order->id)->where('status','completed')->sum('amount'));
-    $due = max(0.0, (float)$total - (float)$paid);
+                    return 0.0;
+                })());
+
+        // --- Financials ---
+        // Base = order total minus explicit penalty (so we don't double count)
+        $base = max(0.0, (float)($order->total_cost ?? 0) - (float)$explicitPenalty);
+
+        // Add penalty back for the "real" total
+        $total = $base + $penalty;
+
+        // VAT calculations
+        $vatRate = (float)($order->vat_percentage ?? 0);
+        $subtotal = $vatRate > 0 ? $base / (1 + ($vatRate / 100)) : $base;
+        $vatAmount = $base - $subtotal;
+
+        // Payments
+        $paid = (float) (Payment::query()
+            ->where('order_id',$order->id)
+            ->where('status','completed')
+            ->sum('amount'));
+
+        $due = max(0.0, $total - $paid);
+
         return [
-            'base' => $base,
-            'penalty' => $penalty,
-            'total' => $total,
-            'paid' => $paid,
-            'due' => $due,
+            'subtotal' => round($subtotal, 2),     // NEW
+            'vat'      => round($vatAmount, 2),    // NEW
+            'base'     => round($base, 2),
+            'penalty'  => round($penalty, 2),
+            'total'    => round($total, 2),
+            'paid'     => round($paid, 2),
+            'due'      => round($due, 2),
         ];
     }
 

@@ -387,17 +387,17 @@
            }
        }
 
-         public function show(Order $order)
-       {
-        $order->load(['customer', 'createdBy', 'orderItems.clothItem.unit', 'orderItems.remarkPresets', 'orderItems.orderItemServices.service', 'orderItems.orderItemServices.employee', 'orderItems.orderItemServices.urgencyTier', 'orderItems.orderItemServices.assignments.employee', 'remarkPresets']);
-        $operators = \App\Models\User::query()
-        ->whereHas('roles', function ($q) {
-            $q->where('name', 'Operator');
-        })
-        ->orderBy('name')
-        ->get();
-       return view('orders.show', compact('order', 'operators'));
-       }
+        public function show(Order $order)
+        {
+            $order->load(['customer', 'createdBy', 'orderItems.clothItem.unit', 'orderItems.remarkPresets', 'orderItems.orderItemServices.service', 'orderItems.orderItemServices.employee', 'orderItems.orderItemServices.urgencyTier', 'orderItems.orderItemServices.assignments.employee', 'remarkPresets']);
+            $operators = \App\Models\User::query()
+            ->whereHas('roles', function ($q) {
+                $q->where('name', 'Operator');
+            })
+            ->orderBy('name')
+            ->get();
+        return view('orders.show', compact('order', 'operators'));
+        }
 
     public function invoice(Order $order)
     {

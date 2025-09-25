@@ -428,38 +428,37 @@
                                     <tr><td class="p-2" colspan="5">No payments recorded.</td></tr>
                                 @endforelse
                             </tbody>
-                            <tfoot>
-                                @php
-                                    $suggest = app(\App\Services\PaymentService::class)->suggestedAmountForOrder($order->id);
-                                    $base = (float)($suggest['base'] ?? 0);
-                                    $penalty = (float)($suggest['penalty'] ?? 0);
-                                    $total = (float)($suggest['total'] ?? (float)($order->total_cost ?? 0));
-                                    $completed = (float)$order->payments()->where('status','completed')->sum('amount');
-                                    $refunded = (float)$order->payments()->where('status','refunded')->sum('amount');
-                                    $paid = max(0.0, $completed - $refunded);
-                                    $due = max(0, $total - $paid);
-                                @endphp
-                                <tr>
-                                    <th class="p-2 text-right" colspan="4">Subtotal</th>
-                                    <th class="p-2 text-right">{{ number_format($base, 2) }}</th>
-                                </tr>
-                                <tr>
-                                    <th class="p-2 text-right" colspan="4">Penalty</th>
-                                    <th class="p-2 text-right">{{ number_format($penalty, 2) }}</th>
-                                </tr>
-                                <tr>
-                                    <th class="p-2 text-right" colspan="4">Total</th>
-                                    <th class="p-2 text-right">{{ number_format($total, 2) }}</th>
-                                </tr>
-                                <tr>
-                                    <th class="p-2 text-right" colspan="4">Paid</th>
-                                    <th class="p-2 text-right">{{ number_format($paid, 2) }}</th>
-                                </tr>
-                                <tr>
-                                    <th class="p-2 text-right" colspan="4">Due</th>
-                                    <th class="p-2 text-right">{{ number_format($due, 2) }}</th>
-                                </tr>
-                            </tfoot>
+                            @php $summary = app(\App\Services\PaymentService::class)->suggestedAmountForOrder($order->id); @endphp
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full border-collapse text-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td class="p-2 font-medium text-right">Subtotal</td>
+                                            <td class="p-2 text-right">{{ number_format($summary['subtotal'], 2) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-medium text-right">VAT</td>
+                                            <td class="p-2 text-right">{{ number_format($summary['vat'], 2) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-medium text-right">Penalty</td>
+                                            <td class="p-2 text-right">{{ number_format($summary['penalty'], 2) }}</td>
+                                        </tr>
+                                        <tr class="font-semibold">
+                                            <td class="p-2 text-right">Total</td>
+                                            <td class="p-2 text-right">{{ number_format($summary['total'], 2) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-medium text-right">Paid</td>
+                                            <td class="p-2 text-right text-green-600">{{ number_format($summary['paid'], 2) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-medium text-right">Due</td>
+                                            <td class="p-2 text-right text-red-600">{{ number_format($summary['due'], 2) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </table>
                     </div>
                 </div>
