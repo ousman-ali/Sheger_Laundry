@@ -35,31 +35,31 @@
                                     @endphp
                                     <td class="p-2">{{ $mine }} / {{ $total }}</td>
                                     <td class="p-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs px-2 py-0.5 rounded bg-gray-100">{{ $svc->status }}</span>
-                                            @php $assignedTotal = (float)$svc->assignedQuantity(); $t = (float)$svc->quantity; @endphp
-                                            @if($assignedTotal>0 && $assignedTotal<$t)
-                                                <span class="text-xs text-gray-500">{{ number_format($assignedTotal,2) }} / {{ number_format($t,2) }}</span>
-                                            @endif
-                                        </div>
-                                        @if($myAssign)
-                                            @php
-                                                $workflow = config('shebar.service_status_workflow');
-                                                $allowed = $workflow[$myAssign->status] ?? [];
-                                                $options = array_values(array_unique(array_merge([$myAssign->status], $allowed)));
-                                            @endphp
-                                            <form method="POST" action="{{ route('order-services.assignment-status') }}" class="inline-flex items-center gap-1 mt-1">
-                                                @csrf
-                                                <input type="hidden" name="assignment_ids[]" value="{{ $myAssign->id }}" />
-                                                <select name="status" class="border rounded p-1 text-xs">
-                                                    @foreach($options as $s)
-                                                        <option value="{{ $s }}" @selected($myAssign->status===$s)>{{ $s }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <button class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Update</button>
-                                            </form>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs px-2 py-0.5 rounded bg-gray-100">{{ $svc->status }}</span>
+                                        @php 
+                                            $assignedTotal = (float)$svc->assignedQuantity(); 
+                                            $t = (float)$svc->quantity; 
+                                        @endphp
+                                        @if($assignedTotal > 0 && $assignedTotal < $t)
+                                            <span class="text-xs text-gray-500">{{ number_format($assignedTotal,2) }} / {{ number_format($t,2) }}</span>
                                         @endif
-                                    </td>
+                                    </div>
+
+                                    {{-- ✅ Replaced assignment update with order service update --}}
+                                    @can('update_order_status')
+                                        <form method="POST" action="{{ route('order-services.status') }}" class="inline-flex items-center gap-1 mt-1">
+                                            @csrf
+                                            <input type="hidden" name="service_ids[]" value="{{ $svc->id }}" />
+                                            <select name="status" class="border rounded p-1 text-xs">
+                                                @foreach(['assigned','in_progress','completed','on_hold','cancelled'] as $s)
+                                                    <option value="{{ $s }}" @selected($svc->status === $s)>{{ $s }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Update</button>
+                                        </form>
+                                    @endcan
+                                </td>
                                 </tr>
                             @endforeach
                         </tbody>
