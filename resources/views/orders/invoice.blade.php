@@ -112,17 +112,41 @@
                                 <th>Service</th>
                                 <th class="text-end">Qty</th>
                                 <th class="text-end">Unit</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Urgency Fee</th>
                                 <th class="text-end">Price (ETB)</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($order->orderItems as $it)
                                 @foreach($it->orderItemServices as $svc)
+                                    @php
+                                        // find pricing tier for this cloth + service
+                                        $pricing = $it->clothItem->pricingTiers
+                                            ->where('service_id', $svc->service_id)
+                                            ->first();
+
+                                        $unitPrice = $pricing?->price ?? 0;
+
+                                        // urgency fee = (multiplier - 1) * (unit price * quantity)
+                                        $multiplier = $svc->urgencyTier?->multiplier ?? 1;
+                                        $urgencyFee = ($multiplier > 1)
+                                            ? ($unitPrice * $svc->quantity * ($multiplier - 1))
+                                            : 0;
+                                    @endphp
+
                                     <tr>
                                         <td>{{ $it->clothItem->name }}</td>
                                         <td>{{ $svc->service->name }}</td>
                                         <td class="text-end">{{ number_format($svc->quantity, 2) }}</td>
                                         <td class="text-end">{{ optional($it->clothItem->unit)->name ?? optional($it->unit)->name }}</td>
+                                        <td class="text-end">{{ number_format($unitPrice, 2) }}</td>
+                                        <td class="text-end">
+                                            {{ number_format($urgencyFee, 2) }}
+                                            @if($svc->urgencyTier)
+                                                ({{ $svc->urgencyTier->multiplier }}×)
+                                            @endif
+                                        </td>
                                         <td class="text-end">{{ number_format($svc->price_applied, 2) }}</td>
                                     </tr>
                                 @endforeach
@@ -144,23 +168,57 @@
                 </div>
                 @php
                     $suggest = app(\App\Services\PaymentService::class)->suggestedAmountForOrder($order->id);
-                    $subtotal = (float)($suggest['base'] ?? 0);
+
+                    // Get raw numbers
+                    $subtotalWithVat = (float)($suggest['base'] ?? 0);
                     $penalty = (float)($suggest['penalty'] ?? 0);
                     $total = (float)($suggest['total'] ?? (float)($order->total_cost ?? 0));
+
+                    // Extract VAT (assuming order has vat_percentage column)
+                    $vatRate = (float)($order->vat_percentage ?? 0);
+                    $subtotal = $vatRate > 0 
+                        ? $subtotalWithVat / (1 + $vatRate / 100) 
+                        : $subtotalWithVat;
+                    $vatAmount = $subtotalWithVat - $subtotal;
+
+                    // Add penalty before grand total
+                    $grandTotal = $subtotal + $penalty + $vatAmount;
+
+                    // Payment calcs
                     $completed = (float)$order->payments()->where('status','completed')->sum('amount');
                     $refunded = (float)$order->payments()->where('status','refunded')->sum('amount');
                     $paid = max(0.0, $completed - $refunded);
-                    $due = max(0, $total - $paid);
+                    $due = max(0, $grandTotal - $paid);
+
                     $itemizedPenalties = $order->itemPenalties()->where('waived', false)->get();
                 @endphp
                 <div>
                     <table class="totals">
                         <tbody>
-                            <tr><th class="text-end" style="width:60%">Subtotal</th><td class="text-end">{{ number_format($subtotal, 2) }} ETB</td></tr>
-                            <tr><th class="text-end">Penalty</th><td class="text-end">{{ number_format($penalty, 2) }} ETB</td></tr>
-                            <tr><th class="text-end">Total</th><td class="text-end"><strong>{{ number_format($total, 2) }} ETB</strong></td></tr>
-                            <tr><th class="text-end">Paid</th><td class="text-end">{{ number_format($paid, 2) }} ETB</td></tr>
-                            <tr><th class="text-end">Due</th><td class="text-end">{{ number_format($due, 2) }} ETB</td></tr>
+                            <tr>
+                                <th class="text-end" style="width:60%">Subtotal (excl. VAT)</th>
+                                <td class="text-end">{{ number_format($subtotal, 2) }} ETB</td>
+                            </tr>
+                            <tr>
+                                <th class="text-end">Penalty</th>
+                                <td class="text-end">{{ number_format($penalty, 2) }} ETB</td>
+                            </tr>
+                            <tr>
+                                <th class="text-end">VAT ({{ $vatRate }}%)</th>
+                                <td class="text-end">{{ number_format($vatAmount, 2) }} ETB</td>
+                            </tr>
+                            <tr>
+                                <th class="text-end">Total</th>
+                                <td class="text-end"><strong>{{ number_format($grandTotal, 2) }} ETB</strong></td>
+                            </tr>
+                            <tr>
+                                <th class="text-end">Paid</th>
+                                <td class="text-end">{{ number_format($paid, 2) }} ETB</td>
+                            </tr>
+                            <tr>
+                                <th class="text-end">Due</th>
+                                <td class="text-end">{{ number_format($due, 2) }} ETB</td>
+                            </tr>
                         </tbody>
                     </table>
 

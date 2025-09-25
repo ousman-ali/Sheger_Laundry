@@ -32,7 +32,12 @@ class InvoiceController extends Controller
         $direction = $validated['direction'] ?? 'desc';
 
         $query = Order::query()
-            ->with(['customer'])
+            ->with([
+                'customer',
+                'orderItems.clothItem.pricingTiers.service', // brings unit prices for services
+                'orderItems.orderItemServices.service',
+                'orderItems.orderItemServices.urgencyTier',
+            ])
             ->withSum(['payments as paid_amount' => function ($q) {
                 $q->where('status', 'completed');
             }], 'amount')
@@ -175,6 +180,20 @@ class InvoiceController extends Controller
         }
 
         $orders = $query->paginate($perPage)->appends($request->query());
+        foreach ($orders as $order) {
+            $vatRate = (float)($order->vat_percentage ?? 0);
+
+            // Subtotal (total without VAT)
+            $subtotal = $order->total_cost / (1 + ($vatRate / 100));
+
+            // VAT amount
+            $vatAmount = $order->total_cost - $subtotal;
+
+            // Attach to the model instance (available in Blade)
+            $order->subtotal = round($subtotal, 2);
+            $order->vat_amount = round($vatAmount, 2);
+            $order->grand_total = round($order->total_cost, 2);
+        }
         return view('invoices.index', compact('orders'));
     }
 }

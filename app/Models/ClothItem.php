@@ -37,4 +37,5 @@ class ClothItem extends Model
     {
         return $this->belongsTo(ClothingGroup::class, 'clothing_group_id');
     }
+    
 }
