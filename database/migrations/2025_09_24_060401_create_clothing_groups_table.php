@@ -16,9 +16,8 @@ return new class extends Migration
             $table->string('name'); // group name
             $table->text('description')->nullable(); // optional description
             $table->foreignId('user_id')
-                ->unique() // enforce one-to-one
-                ->constrained('users')
-                ->onDelete('cascade');
+                  ->constrained('users')
+                  ->onDelete('cascade');
             $table->timestamps();
         });
     }

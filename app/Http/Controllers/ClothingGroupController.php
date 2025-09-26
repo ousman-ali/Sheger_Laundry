@@ -23,8 +23,10 @@ class ClothingGroupController extends Controller
      */
     public function create()
     {
-        $clothItems = ClothItem::all();
+        // Only fetch items that are not in any group
+        $clothItems = ClothItem::whereNull('clothing_group_id')->get();
         $users = User::all();
+
         return view('clothing-groups.create', compact('clothItems', 'users'));
     }
 

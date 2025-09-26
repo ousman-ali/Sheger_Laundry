@@ -58,6 +58,6 @@ class User extends Authenticatable
 
     public function clothingGroup()
     {
-        return $this->hasOne(ClothingGroup::class);
+        return $this->hasMany(ClothingGroup::class);
     }
 }
