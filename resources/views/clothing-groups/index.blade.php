@@ -110,16 +110,4 @@
             </div>
         </div>
     </div>
-    {{-- Unassigned Cloth Items --}}
-    <div class="mt-8 bg-gray-50 p-4 rounded">
-        <h3 class="font-semibold text-lg mb-2">Unassigned Cloth Items</h3>
-
-        @forelse($unassignedClothItems as $item)
-            <div class="text-sm text-gray-700">- {{ $item->name }}</div>
-        @empty
-            <div class="text-green-600 font-medium">
-                All cloth items are assigned to a clothing group
-            </div>
-        @endforelse
-    </div>
 </x-app-layout>

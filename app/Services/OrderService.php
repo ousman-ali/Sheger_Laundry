@@ -222,59 +222,65 @@ class OrderService
 
     public function assignEmployee(OrderItemService $service, ?int $employeeId, ?float $quantity = null): OrderItemService
     {
-        // If no employee provided, nothing to assign (could be extendable to unassign in the future)
         if (!$employeeId) {
             return $service;
         }
 
-        // Perform the assignment in a transaction to avoid over-allocation under concurrency
         $appliedQty = 0.0;
         $service = DB::transaction(function () use ($service, $employeeId, $quantity, &$appliedQty) {
-            // Lock the service row for update
             /** @var OrderItemService $locked */
             $locked = OrderItemService::query()->whereKey($service->id)->lockForUpdate()->firstOrFail();
 
-            // Compute remaining under lock using locked assignments
             $totalQty = (float) $locked->quantity;
             $currentlyAssigned = (float) $locked->assignments()->lockForUpdate()->sum('quantity');
             $remaining = max(0.0, $totalQty - $currentlyAssigned);
 
-            // Ensure non-negative, clamp to remaining
-            $qty = $quantity === null ? $remaining : max(0.0, min((float)$quantity, $remaining));
-            if ($qty <= 0) {
-                $appliedQty = 0.0;
-                return $locked->loadMissing(['assignments', 'orderItem.order', 'service']);
-            }
+            // Decide how much to allocate
+            $requestedQty = $quantity === null ? $remaining : (float)$quantity;
 
-            // Upsert the employee assignment under lock
-            $assignment = $locked->assignments()->where('employee_id', $employeeId)->lockForUpdate()->first();
-            if ($assignment) {
-                $assignment->quantity = (float) $assignment->quantity + $qty;
-                if ($assignment->status === 'cancelled') {
-                    $assignment->status = 'assigned';
-                }
-                $assignment->save();
-            } else {
+            // 🔑 Smart assignment rules
+            if ($remaining <= 0 || $requestedQty > $remaining) {
+                // Case 1 + Case 2: Replace
+                $locked->assignments()->delete();
+
+                $assignQty = $quantity === null ? $totalQty : min($requestedQty, $totalQty);
                 $locked->assignments()->create([
                     'employee_id' => $employeeId,
-                    'quantity' => $qty,
-                    'status' => 'assigned',
+                    'quantity'   => $assignQty,
+                    'status'     => 'assigned',
                 ]);
+
+                $appliedQty = $assignQty;
+            } else {
+                // Case 3: Add (normal behavior)
+                $assignment = $locked->assignments()->where('employee_id', $employeeId)->lockForUpdate()->first();
+                if ($assignment) {
+                    $assignment->quantity = (float) $assignment->quantity + $requestedQty;
+                    if ($assignment->status === 'cancelled') {
+                        $assignment->status = 'assigned';
+                    }
+                    $assignment->save();
+                } else {
+                    $locked->assignments()->create([
+                        'employee_id' => $employeeId,
+                        'quantity'   => $requestedQty,
+                        'status'     => 'assigned',
+                    ]);
+                }
+                $appliedQty = $requestedQty;
             }
 
-            // Mark service as assigned only if fully allocated
-            $newAssigned = $currentlyAssigned + $qty;
+            // Update service status
+            $newAssigned = $locked->assignments()->sum('quantity');
             if ($locked->status === 'pending' && $newAssigned >= $totalQty) {
                 $locked->status = 'assigned';
                 $locked->save();
             }
 
-            $appliedQty = $qty;
             return $locked->loadMissing(['assignments', 'orderItem.order', 'service']);
         });
 
         if ($appliedQty > 0) {
-            // Activity log and notification outside the transaction
             $this->logActivity('assigned_employee', $service->orderItem->order, [
                 'order_item_service_id' => $service->id,
                 'employee_id' => $employeeId,
@@ -290,15 +296,14 @@ class OrderService
                 );
                 $url = route('orders.show', $service->orderItem->order);
                 $this->notifications->createNotification($employeeId, 'assignment', $msg, $url, [
-                    'order_id' => $service->orderItem->order->id,
+                    'order_id'   => $service->orderItem->order->id,
                     'order_code' => $service->orderItem->order->order_id,
                     'service_id' => $service->id,
-                    'quantity' => $appliedQty,
+                    'quantity'   => $appliedQty,
                 ]);
             } catch (\Throwable $e) { /* ignore */ }
         }
 
-        // Derive statuses based on assignments
         $this->deriveServiceStatusFromAssignments($service);
         $this->deriveOrderStatusFromServices($service->orderItem->order);
 
