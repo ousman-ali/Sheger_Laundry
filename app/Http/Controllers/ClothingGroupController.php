@@ -12,10 +12,47 @@ class ClothingGroupController extends Controller
     /**
      * Show all clothing groups
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clothingGroups = ClothingGroup::with(['user','clothItems'])->paginate(10);
-        return view('clothing-groups.index', compact('clothingGroups'));
+        // Validate inputs
+        $validated = $request->validate([
+            'q' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|in:10,25,50,100',
+            'sort' => 'nullable|in:name,created_at',
+            'direction' => 'nullable|in:asc,desc',
+        ]);
+
+        // Sticky per-page
+        if (!empty($validated['per_page'] ?? null)) {
+            $perPage = (int) $validated['per_page'];
+            $request->session()->put('clothing_groups.per_page', $perPage);
+        } else {
+            $perPage = (int) $request->session()->get('clothing_groups.per_page', 10);
+        }
+
+        // Build query
+        $query = ClothingGroup::with(['user','clothItems']);
+
+        // Search filter
+        if (!empty($validated['q'] ?? null)) {
+            $q = $validated['q'];
+            $query->where('name', 'like', "%{$q}%")
+                ->orWhere('description', 'like', "%{$q}%");
+        }
+
+        // Sorting
+        $sort = $validated['sort'] ?? 'name';
+        $direction = $validated['direction'] ?? 'asc';
+        $query->orderBy($sort, $direction);
+
+        // Paginate with sticky params
+        $clothingGroups = $query->paginate($perPage)
+            ->appends(array_merge(
+                $request->only(['q','sort','direction']),
+                ['per_page' => $perPage]
+            ));
+
+        return view('clothing-groups.index', compact('clothingGroups', 'sort', 'direction'));
     }
 
     /**
