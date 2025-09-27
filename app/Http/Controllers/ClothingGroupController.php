@@ -63,7 +63,11 @@ class ClothingGroupController extends Controller
      */
     public function edit(ClothingGroup $clothingGroup)
     {
-        $clothItems = ClothItem::with('unit')->get(); // include unit for display
+        $clothItems = ClothItem::with('unit')
+            ->whereNull('clothing_group_id')
+            ->orWhere('clothing_group_id', $clothingGroup->id)
+            ->get();
+
         $users = User::all();
 
         return view('clothing-groups.edit', compact('clothingGroup', 'clothItems', 'users'));
