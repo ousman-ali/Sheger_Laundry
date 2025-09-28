@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('vat_percentage', 5, 2);
             $table->dateTime('appointment_date')->nullable();
             $table->dateTime('pickup_date')->nullable();
+            $table->enum('date_type', ['GC', 'EC'])->default('GC');
             $table->decimal('penalty_amount', 10, 2)->default(0.00);
             $table->decimal('penalty_daily_rate', 10, 2)->nullable();
             $table->enum('status', ['received', 'processing', 'washing', 'drying_steaming', 'ironing', 'packaging', 'ready_for_pickup', 'delivered', 'cancelled']);

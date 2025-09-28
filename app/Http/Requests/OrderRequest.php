@@ -33,6 +33,7 @@ class OrderRequest extends FormRequest
             'discount' => 'nullable|numeric|min:0|max:1000',
             'appointment_date' => 'nullable|date|after:now',
             'pickup_date' => 'nullable|date|after_or_equal:appointment_date',
+            'date_type' => 'required|in:GC,EC',
             'remarks' => 'nullable|string|max:1000',
         ];
     }

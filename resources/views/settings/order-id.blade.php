@@ -40,6 +40,14 @@
                         <input type="text" name="vip_order_id_prefix" class="w-full border rounded p-2" value="{{ old('vip_order_id_prefix', $settings['vip_order_id_prefix']) }}" maxlength="10" />
                         <p class="text-xs text-gray-600">When set, VIP orders will be prefixed like VIP-ORD-20250101-001.</p>
                     </div>
+                    <!-- 🔹 VAT Percentage -->
+                    <div>
+                        <label class="block text-sm font-medium">VAT Percentage</label>
+                        <input type="number" step="0.01" min="0" max="100" name="vat_percentage"
+                               class="w-full border rounded p-2"
+                               value="{{ old('vat_percentage', $settings['vat_percentage']) }}" required />
+                        <p class="text-xs text-gray-600">Set the VAT percentage (e.g., 15 for 15%).</p>
+                    </div>
                     <div class="flex gap-2">
                         <button class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
                         <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded border">Back</a>

@@ -15,14 +15,15 @@ class Order extends Model
     use HasFactory;
     protected $fillable = [
         'order_id', 'customer_id', 'created_by', 'total_cost', 'discount',
-        'vat_percentage', 'appointment_date', 'pickup_date', 'penalty_amount',
-        'penalty_daily_rate', 'status', 'remarks',
+        'vat_percentage', 'appointment_date', 'pickup_date', 'date_type',
+        'penalty_amount', 'penalty_daily_rate', 'status', 'remarks',
     ];
 
     protected $casts = [
         'status' => 'string',
         'appointment_date' => 'datetime',
         'pickup_date' => 'datetime',
+        'date_type' => 'string',
     ];
 
     public function customer(): BelongsTo

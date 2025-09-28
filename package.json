@@ -23,6 +23,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "ethiopian-date": "^0.0.6",
         "ethiopian-date-picker-and-converter": "^1.2.1"
     }
 }

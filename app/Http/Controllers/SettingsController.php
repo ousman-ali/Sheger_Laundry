@@ -120,6 +120,7 @@ class SettingsController extends Controller
             'order_id_format' => \App\Models\SystemSetting::getValue('order_id_format', config('shebar.order_id_format', 'Ymd')),
             'order_id_sequence_length' => (int) \App\Models\SystemSetting::getValue('order_id_sequence_length', config('shebar.order_id_sequence_length', config('shebar.order_id_suffix_length', 3))),
             'vip_order_id_prefix' => \App\Models\SystemSetting::getValue('vip_order_id_prefix', config('shebar.vip_order_id_prefix', 'VIP')),
+            'vat_percentage' => \App\Models\SystemSetting::getValue('vat_percentage', config('sheger.vat_percentage', 15)),
         ];
         return view('settings.order-id', compact('settings'));
     }
@@ -131,6 +132,7 @@ class SettingsController extends Controller
             'order_id_format' => 'required|string|max:20',
             'order_id_sequence_length' => 'required|integer|min:1|max:10',
             'vip_order_id_prefix' => 'nullable|string|max:10',
+            'vat_percentage' => 'required|numeric|min:0|max:100',
         ]);
 
         \App\Models\SystemSetting::setValue('order_id_prefix', (string)$data['order_id_prefix']);
@@ -139,6 +141,7 @@ class SettingsController extends Controller
         if (array_key_exists('vip_order_id_prefix', $data)) {
             \App\Models\SystemSetting::setValue('vip_order_id_prefix', (string)$data['vip_order_id_prefix']);
         }
+        \App\Models\SystemSetting::setValue('vat_percentage', (string)$data['vat_percentage']);
 
         return back()->with('success', 'Order ID settings updated.');
     }

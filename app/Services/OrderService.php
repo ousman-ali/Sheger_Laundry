@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Andegna\DateTime;
+use Andegna\DateTimeFactory;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderItemService;
@@ -23,6 +25,7 @@ class OrderService
     public function __construct(private NotificationService $notifications)
     {
     }
+
     public function createOrder(array $data): Order
     {
         return DB::transaction(function () use ($data) {
@@ -45,9 +48,10 @@ class OrderService
                 'created_by' => Auth::id(),
                 'total_cost' => 0,
                 'discount' => $data['discount'] ?? 0,
-                'vat_percentage' => config('shebar.vat_percentage'),
+                'vat_percentage' => system_setting('vat_percentage', config('shebar.vat_percentage')),
                 'appointment_date' => $data['appointment_date'] ?? null,
                 'pickup_date' => $data['pickup_date'] ?? null,
+                'date_type' => $data['date_type'] ?? 'GC',
                 'penalty_daily_rate' => config('shebar.penalty_daily_rate'),
                 'status' => config('shebar.default_order_status'),
                 'remarks' => $data['remarks'] ?? null,
@@ -495,6 +499,7 @@ class OrderService
                 'discount' => $data['discount'] ?? $order->discount,
                 'appointment_date' => $data['appointment_date'] ?? $order->appointment_date,
                 'pickup_date' => $data['pickup_date'] ?? $order->pickup_date,
+                'date_type' => $data['date_type'] ?? $order->date_type,
                 'remarks' => $data['remarks'] ?? $order->remarks,
             ];
             if (!empty($data['order_id'])) {
@@ -634,8 +639,12 @@ class OrderService
                 $subtotal = $order->orderItemServices()->sum('price_applied');
             }
 
+            $order->vat_percentage = system_setting('vat_percentage', config('shebar.vat_percentage'));
             $finalTotal = $this->calculateFinalTotal($subtotal, $order->vat_percentage, $order->discount);
-            $order->update(['total_cost' => $finalTotal]);
+            $order->update([
+                'vat_percentage' => $order->vat_percentage,
+                'total_cost' => $finalTotal,
+            ]);
 
             $this->logActivity('updated_order', $order, $changesLog);
 
