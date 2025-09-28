@@ -1,8 +1,8 @@
 <aside class="hidden md:flex bg-white border-r border-gray-200 sticky top-0 h-screen flex-col" :class="sidebarCollapsed ? 'w-16' : 'w-64'">
     <div class="h-16 border-b flex items-center px-2 md:px-4 justify-between shrink-0">
         <span class="text-sm font-semibold text-gray-400" x-show="!sidebarCollapsed">Navigation</span>
-        <button @click="toggleSidebar()" class="p-2 rounded hover:bg-blue-100" title="Toggle sidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <button @click="toggleSidebar()" class="p-2 rounded-full hover:bg-blue-100" title="Toggle sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h10a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 110-2z" clip-rule="evenodd" />
             </svg>
         </button>
