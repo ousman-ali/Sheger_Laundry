@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Clothing Groups') }}
             </h2>
-            @can('create_clothing_groups')
+            @can('create_cloth_groups')
                 <x-create-button :href="route('clothing-groups.create')" label="Add Clothing Group" />
             @endcan
         </div>
@@ -83,10 +83,10 @@
                                     </td>
                                     <td class="p-2">{{ \Illuminate\Support\Str::limit($group->description, 80) }}</td>
                                     <td class="p-2 flex gap-3 items-center">
-                                        @can('edit_clothing_groups')
+                                        @can('edit_cloth_groups')
                                             <a href="{{ route('clothing-groups.edit', $group) }}" class="text-blue-600">Edit</a>
                                         @endcan
-                                        @can('delete_clothing_groups')
+                                        @can('delete_cloth_groups')
                                             <form action="{{ route('clothing-groups.destroy', $group) }}" method="POST" data-confirm="Delete this clothing group?" data-confirm-title="Please Confirm" data-confirm-ok="Delete" data-confirm-cancel="Cancel">
                                                 @csrf
                                                 @method('DELETE')

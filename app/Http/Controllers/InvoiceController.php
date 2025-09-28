@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Utils\EthiopianCalendar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
@@ -193,6 +195,15 @@ class InvoiceController extends Controller
             $order->subtotal = round($subtotal, 2);
             $order->vat_amount = round($vatAmount, 2);
             $order->grand_total = round($order->total_cost, 2);
+            
+            // ✅ Convert appointment & pickup date if date_type = EC
+            if ($order->date_type === 'EC') {
+                $order->appointment_date_display = EthiopianCalendar::toEthiopian($order->appointment_date);
+                $order->pickup_date_display = EthiopianCalendar::toEthiopian($order->pickup_date);
+            } else {
+                $order->appointment_date_display = optional($order->appointment_date)->toDateTimeString();
+                $order->pickup_date_display = optional($order->pickup_date)->toDateTimeString();
+            }
         }
         return view('invoices.index', compact('orders'));
     }

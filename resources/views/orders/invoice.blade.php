@@ -80,7 +80,11 @@
 
         <main class="content">
             <div class="title">Invoice</div>
-            <div class="id">Invoice #{{ $order->order_id }} • Date: {{ now()->format('Y-m-d H:i') }}</div>
+            <div class="id">
+                Invoice #{{ $order->order_id }}
+                • Received On: {{ $order->appointment_date_display ?? optional($order->created_at)->format('Y-m-d H:i') }}
+                ({{ strtoupper($order->date_type) }})
+            </div>
 
             <div class="section-bar">Transaction information</div>
             <div class="panel">
@@ -89,8 +93,8 @@
                     <div>{{ optional($order->customer)->name ?? '-' }}</div>
                     <div class="label" style="margin-top:4px;">Phone</div>
                     <div>{{ optional($order->customer)->phone ?? '-' }}</div>
-                    <div class="label" style="margin-top:4px;">Date</div>
-                    <div>{{ optional($order->created_at)->format('Y-m-d') }}</div>
+                    <div class="label" style="margin-top:4px;">Pick On:</div>
+                    <div>{{ $order->pickup_date_display ?? 'Not Set' }} ({{ strtoupper($order->date_type) }})</div>
                 </div>
                 <div class="card">
                     <div class="label">From</div>

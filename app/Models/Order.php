@@ -9,10 +9,40 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\RemarkPreset;
+use App\Utils\EthiopianCalendar;
 
 class Order extends Model
 {
     use HasFactory;
+
+    protected $appends = ['appointment_date_display', 'pickup_date_display'];
+
+    public function getAppointmentDateDisplayAttribute()
+    {
+        if (!$this->appointment_date) {
+            return null;
+        }
+
+        if (strtoupper($this->date_type) === 'EC') {
+            return EthiopianCalendar::toEthiopian($this->appointment_date);
+        }
+
+        return optional($this->appointment_date)->toDateTimeString();
+    }
+
+    public function getPickupDateDisplayAttribute()
+    {
+        if (!$this->pickup_date) {
+            return null;
+        }
+
+        if (strtoupper($this->date_type) === 'EC') {
+            return EthiopianCalendar::toEthiopian($this->pickup_date);
+        }
+
+        return optional($this->pickup_date)->toDateTimeString();
+    }
+
     protected $fillable = [
         'order_id', 'customer_id', 'created_by', 'total_cost', 'discount',
         'vat_percentage', 'appointment_date', 'pickup_date', 'date_type',

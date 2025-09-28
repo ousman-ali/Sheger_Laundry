@@ -41,6 +41,12 @@ class RolePermissionSeeder extends Seeder
             'edit_cloth_items',
             'delete_cloth_items',
 
+            //cloth group permissions
+            'view_cloth_groups',
+            'create_cloth_groups',
+            'edit_cloth_groups',
+            'delete_cloth_groups',
+
             // Unit permissions
             'view_units',
             'create_units',
@@ -100,6 +106,7 @@ class RolePermissionSeeder extends Seeder
             'export_services','print_services',
             'export_units','print_units',
             'export_cloth_items','print_cloth_items',
+            'export_cloth_groups','print_cloth_groups',
             'export_pricing','print_pricing',
             'export_urgency_tiers','print_urgency_tiers',
             'export_stock_usage','print_stock_usage',
@@ -155,6 +162,7 @@ class RolePermissionSeeder extends Seeder
             'view_orders', 'create_orders', 'edit_orders', 'update_order_status',
             'view_services', 'create_services', 'edit_services',
             'view_cloth_items', 'create_cloth_items', 'edit_cloth_items',
+            'view_cloth_groups', 'create_cloth_groups', 'edit_cloth_groups',
             'view_units', 'create_units', 'edit_units',
             'view_pricing', 'create_pricing', 'edit_pricing',
             'view_urgency_tiers', 'create_urgency_tiers', 'edit_urgency_tiers',
@@ -175,6 +183,7 @@ class RolePermissionSeeder extends Seeder
             'export_services','print_services',
             'export_units','print_units',
             'export_cloth_items','print_cloth_items',
+            'export_cloth_groups','print_cloth_groups',
             'export_pricing','print_pricing',
             'export_urgency_tiers','print_urgency_tiers',
             'export_stock_usage','print_stock_usage',
@@ -191,7 +200,7 @@ class RolePermissionSeeder extends Seeder
             'view_customers', 'create_customers', 'edit_customers',
             'view_orders', 'create_orders', 'edit_orders',
             'view_services', 'view_cloth_items', 'view_pricing', 'view_urgency_tiers',
-            'view_units',
+            'view_units', 
             'view_inventory', 'view_stores',
             'view_payments', 'create_payments',
             // Receptionists can export/print customers, orders, and invoices for front-desk ops
@@ -204,7 +213,7 @@ class RolePermissionSeeder extends Seeder
     $operatorRole->givePermissionTo([
             'view_orders', 'update_order_status',
             'view_services', 'view_cloth_items', 'view_units',
-            'view_inventory', 'manage_stock',
+            'view_inventory', 'manage_stock', 'view_cloth_groups',
             'view_stores',
             'view_stock_usage',
             // Stock-out Requests (Operator flow)

@@ -107,9 +107,6 @@ class OrderService
 
     public function createOrder(array $data): Order
     {
-        Log::info('createOrder incoming data', [
-            'date_type_in_request' => $data['date_type'] ?? null,
-        ]);
         return DB::transaction(function () use ($data) {
             $customer = \App\Models\Customer::findOrFail($data['customer_id']);
             // If Admin supplied a manual order_id, use it as-is (validated unique in request)
@@ -124,7 +121,6 @@ class OrderService
 
             // determine date_type and original inputs
             $dateType = $data['date_type'] ?? 'GC';
-            Log::info('Resolved date_type', ['date_type' => $dateType]);
             $appointmentDate = $data['appointment_date'] ?? null;
             $pickupDate = $data['pickup_date'] ?? null;
 
@@ -141,9 +137,6 @@ class OrderService
                     throw new \RuntimeException('Invalid Ethiopian pickup_date provided.');
                 }
             }
-            Log::info('About to create order with date_type', [
-                'date_type' => $dateType
-            ]);
             $order = Order::create([
                 'order_id' => $orderId,
                 'customer_id' => $data['customer_id'],
@@ -160,7 +153,6 @@ class OrderService
                 'status' => config('shebar.default_order_status'),
                 'remarks' => $data['remarks'] ?? null,
             ]);
-            Log::info('Saved order in DB', ['id' => $order->id, 'date_type' => $order->date_type]);
 
             $totalCost = 0;
 
