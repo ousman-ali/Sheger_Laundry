@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 use App\Services\NotificationService;
+use DateTimeZone;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -26,8 +28,88 @@ class OrderService
     {
     }
 
+    /**
+ * Convert Ethiopian date/time string to Gregorian 'Y-m-d H:i:s'
+ *
+ * Accepts: "YYYY-MM-DD", "YYYY-MM-DDTHH:mm", "YYYY-MM-DD HH:mm", "YYYY-MM-DDTHH:mm:ss"
+ * Returns: "Y-m-d H:i:s" or null on failure
+ */
+    private function convertEthiopianToGregorian(?string $ethiopianDateTime): ?string
+    {
+        if (empty($ethiopianDateTime)) {
+            return null;
+        }
+
+        try {
+            $raw = trim($ethiopianDateTime);
+
+            // split by 'T' or whitespace
+            $parts = preg_split('/[T\s]+/', $raw);
+            $datePart = $parts[0] ?? null;
+            $timePart = $parts[1] ?? '00:00:00';
+
+            if (! $datePart || ! preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/', $datePart)) {
+                Log::error('Invalid Ethiopian date format: ' . $raw);
+                return null;
+            }
+
+            [$etYear, $etMonth, $etDay] = array_map('intval', explode('-', $datePart));
+
+            // Basic bounds validation for Ethiopian calendar
+            if ($etMonth < 1 || $etMonth > 13) {
+                Log::error("Invalid Ethiopian month: {$etMonth}");
+                return null;
+            }
+            if ($etMonth === 13) {
+                // Pagume: 1-5 (or 6 in Ethiopian leap years) — we allow up to 6 here and trust Andegna for leap-year correctness
+                if ($etDay < 1 || $etDay > 6) {
+                    Log::error("Invalid Pagume day: {$etDay}");
+                    return null;
+                }
+            } else {
+                if ($etDay < 1 || $etDay > 30) {
+                    Log::error("Invalid Ethiopian day: {$etDay}");
+                    return null;
+                }
+            }
+
+            // normalize time (ensure seconds present)
+            if (preg_match('/^\d{1,2}:\d{2}$/', $timePart)) {
+                $timePart .= ':00';
+            } elseif (! preg_match('/^\d{1,2}:\d{2}:\d{2}$/', $timePart)) {
+                $timePart = '00:00:00';
+            }
+
+            [$hour, $minute, $second] = array_map('intval', explode(':', $timePart));
+
+            // Build Ethiopic date using Andegna, convert to PHP DateTime (Gregorian)
+            $ethiopic = DateTimeFactory::of($etYear, $etMonth, $etDay);
+            // toGregorian() returns a PHP \DateTime instance (Gregorian)
+            $gregorian = $ethiopic->toGregorian();
+
+            // Apply time portion
+            $gregorian->setTime($hour, $minute, $second);
+
+            // Decide on storage timezone:
+            // - recommended: store in UTC for consistency across servers
+            // - alternative: set to Africa/Addis_Ababa if that's your app convention
+            $storeInUtc = true; // flip if you want to store in local tz
+            $tz = $storeInUtc ? new DateTimeZone('UTC') : new DateTimeZone('Africa/Addis_Ababa');
+            $gregorian->setTimezone($tz);
+
+            return $gregorian->format('Y-m-d H:i:s');
+        } catch (\Throwable $e) {
+            Log::error('Ethiopian->Gregorian conversion failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+
     public function createOrder(array $data): Order
     {
+        Log::info('createOrder incoming data', [
+            'date_type_in_request' => $data['date_type'] ?? null,
+        ]);
         return DB::transaction(function () use ($data) {
             $customer = \App\Models\Customer::findOrFail($data['customer_id']);
             // If Admin supplied a manual order_id, use it as-is (validated unique in request)
@@ -40,6 +122,28 @@ class OrderService
                 $orderId = $vipPrefix . $orderId;
             }
 
+            // determine date_type and original inputs
+            $dateType = $data['date_type'] ?? 'GC';
+            Log::info('Resolved date_type', ['date_type' => $dateType]);
+            $appointmentDate = $data['appointment_date'] ?? null;
+            $pickupDate = $data['pickup_date'] ?? null;
+
+            // convert if the UI sent Ethiopian dates
+            if ($dateType === 'EC') {
+                $appointmentDate = $this->convertEthiopianToGregorian($appointmentDate);
+                $pickupDate = $this->convertEthiopianToGregorian($pickupDate);
+
+                // optional: fail loud if conversion fails (you can also default to null)
+                if ($appointmentDate === null && ! empty($data['appointment_date'])) {
+                    throw new \RuntimeException('Invalid Ethiopian appointment_date provided.');
+                }
+                if ($pickupDate === null && ! empty($data['pickup_date'])) {
+                    throw new \RuntimeException('Invalid Ethiopian pickup_date provided.');
+                }
+            }
+            Log::info('About to create order with date_type', [
+                'date_type' => $dateType
+            ]);
             $order = Order::create([
                 'order_id' => $orderId,
                 'customer_id' => $data['customer_id'],
@@ -49,13 +153,14 @@ class OrderService
                 'total_cost' => 0,
                 'discount' => $data['discount'] ?? 0,
                 'vat_percentage' => system_setting('vat_percentage', config('shebar.vat_percentage')),
-                'appointment_date' => $data['appointment_date'] ?? null,
-                'pickup_date' => $data['pickup_date'] ?? null,
-                'date_type' => $data['date_type'] ?? 'GC',
+                'appointment_date' => $appointmentDate,
+                'pickup_date' => $pickupDate,
+                'date_type' => $dateType,
                 'penalty_daily_rate' => config('shebar.penalty_daily_rate'),
                 'status' => config('shebar.default_order_status'),
                 'remarks' => $data['remarks'] ?? null,
             ]);
+            Log::info('Saved order in DB', ['id' => $order->id, 'date_type' => $order->date_type]);
 
             $totalCost = 0;
 

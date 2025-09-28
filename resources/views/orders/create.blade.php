@@ -283,52 +283,63 @@
                     </div>
                     <button type="button" class="add-item bg-blue-500 text-white px-3 py-1 rounded text-sm mb-6">Add Item</button>
 
-                    <div class="grid md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium">Discount</label>
-                            <input type="number" step="0.01" name="discount" class="w-full border rounded p-2">
-                        </div>
-                        
-                        <!-- Ethiopian Date Picker Section -->
-                        <div>
-                            <label class="block text-sm font-medium">Order Received Date & Time</label>
-                            <div class="flex gap-2 items-center">
-                                <select id="calendar_type" class="border rounded p-2 text-sm" name="calendar_type">
-                                    <option value="gc">Gregorian (GC)</option>
-                                    <option value="ec" selected>Ethiopian (EC)</option>
+                    <!-- Replace the entire date picker section with this code -->
+                    <input type="hidden" name="date_type" id="date_type_field" value="EC">
+
+                    <div class="grid gap-6 mb-6">
+                        <!-- Row 1: Discount + Date Type -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Discount</label>
+                                <input type="number" step="0.01" name="discount" 
+                                    class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Date Type</label>
+                                <select id="calendar_type" name="date_type"
+                                        class="w-full border rounded-lg p-2 text-sm focus:ring focus:ring-blue-300">
+                                    <option value="GC">Gregorian (GC)</option>
+                                    <option value="EC" selected>Ethiopian (EC)</option>
                                 </select>
-                                <div class="flex-1 relative">
-                                    <!-- Gregorian Date (hidden by default) - This will be sent to backend -->
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Dates Side by Side -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Order Received Date -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Order Received Date & Time</label>
+                                <div class="relative">
+                                    <!-- Gregorian Date (hidden by default) -->
                                     <input type="datetime-local" id="gc_appointment_date" name="appointment_date" 
-                                        value="{{ old('appointment_date', now()->format('Y-m-d\\TH:i')) }}" 
-                                        class="w-full border rounded p-2" style="display: none;">
-                                    
-                                    <!-- Ethiopian Date Picker (displayed by default) -->
+                                        class="w-full border rounded-lg p-2 hidden focus:ring focus:ring-blue-300">
+
+                                    <!-- Ethiopian Date Picker -->
                                     <div class="ethiopian-date-picker-container">
                                         <input type="text" id="ec_appointment_date" 
-                                            class="w-full border rounded p-2 ethiopian-date-input" 
+                                            class="w-full border rounded-lg p-2 ethiopian-date-input focus:ring focus:ring-blue-300" 
                                             placeholder="የትዕዛዝ ቀን ይምረጡ (YYYY-MM-DD)" 
                                             readonly
                                             data-target="gc_appointment_date">
                                         <div class="ethiopian-calendar-dropdown" id="ec_appointment_calendar"></div>
                                     </div>
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">Defaults to current time; you can edit this to record a different received time.</p>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Defaults to current time; you can edit this to record a different received time.</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium">Pickup Date</label>
-                            <div class="flex gap-2 items-center">
-                                <!-- Gregorian Date (hidden) - This will be sent to backend -->
-                                <input type="datetime-local" id="gc_pickup_date" name="pickup_date" 
-                                    class="w-full border rounded p-2" style="display: none;">
-                                
-                                <!-- Ethiopian Date Picker -->
-                                <div class="flex-1 relative">
+
+                            <!-- Pickup Date -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Pickup Date</label>
+                                <div class="relative">
+                                    <!-- Gregorian Date (hidden) -->
+                                    <input type="datetime-local" id="gc_pickup_date" name="pickup_date" 
+                                        class="w-full border rounded-lg p-2 hidden focus:ring focus:ring-blue-300">
+
+                                    <!-- Ethiopian Date Picker -->
                                     <div class="ethiopian-date-picker-container">
                                         <input type="text" id="ec_pickup_date" 
-                                            class="w-full border rounded p-2 ethiopian-date-input" 
+                                            class="w-full border rounded-lg p-2 ethiopian-date-input focus:ring focus:ring-blue-300" 
                                             placeholder="የማምጣት ቀን ይምረጡ (YYYY-MM-DD)" 
                                             readonly
                                             data-target="gc_pickup_date">
@@ -366,627 +377,610 @@
     <script src="https://cdn.jsdelivr.net/npm/ethiopic-calendar@latest/dist/ethiopic-calendar.min.js"></script>
 
     <style>
-    .ethiopian-date-picker-container {
-        position: relative;
-        width: 100%;
-    }
+        .ethiopian-date-picker-container {
+            position: relative;
+            width: 100%;
+        }
 
-    .ethiopian-calendar-dropdown {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        z-index: 1000;
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin-top: 5px;
-        display: none;
-        width: 320px;
-        /* FIXED: Add scrolling for the entire calendar */
-        max-height: 400px; /* Limit height and enable scrolling */
-        overflow-y: auto; /* Enable vertical scrolling */
-    }
+        .ethiopian-calendar-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 5px;
+            display: none;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
 
-    .ethiopian-calendar {
-        padding: 15px;
-        font-family: Arial, sans-serif;
-        width: 100%;
-        box-sizing: border-box;
-        /* FIXED: Ensure calendar content doesn't get cut off */
-        min-height: 350px; /* Minimum height to accommodate all content */
-    }
+        .ethiopian-calendar {
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 350px;
+        }
 
-    .calendar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        /* FIXED: Make header sticky when scrolling */
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-    .calendar-nav-btn {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 14px;
-    }
+        .calendar-nav-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
-    .calendar-nav-btn:hover {
-        background: #0056b3;
-    }
+        .calendar-nav-btn:hover {
+            background: #0056b3;
+        }
 
-    .calendar-title {
-        font-weight: bold;
-        font-size: 16px;
-        margin: 0 10px;
-    }
+        .calendar-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0 10px;
+        }
 
-    .year-month-selectors {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        /* FIXED: Make selectors sticky when scrolling */
-        position: sticky;
-        top: 60px; /* Below the header */
-        background: white;
-        z-index: 5;
-        padding: 5px 0;
-    }
+        .year-month-selectors {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 60px;
+            background: white;
+            z-index: 5;
+            padding: 5px 0;
+        }
 
-    .year-selector, .month-selector {
-        flex: 1;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-    }
+        .year-selector, .month-selector {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
 
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 1px;
-        background: #ddd;
-        border: 1px solid #ddd;
-        /* FIXED: Ensure grid has proper height for all 6 rows */
-        min-height: 240px; /* 6 rows × 40px */
-    }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #ddd;
+            border: 1px solid #ddd;
+            min-height: 240px;
+        }
 
-    .calendar-day-header {
-        text-align: center;
-        font-weight: bold;
-        padding: 10px 0;
-        background: #e9ecef;
-        font-size: 12px;
-        /* FIXED: Make day headers sticky */
-        position: sticky;
-        top: 120px; /* Below header and selectors */
-        z-index: 5;
-    }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px 0;
+            background: #e9ecef;
+            font-size: 12px;
+            position: sticky;
+            top: 120px;
+            z-index: 5;
+        }
 
-    .calendar-day {
-        padding: 12px 0;
-        text-align: center;
-        background: white;
-        cursor: pointer;
-        border: none;
-        font-size: 14px;
-        transition: all 0.2s;
-        min-height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 40px;
-        box-sizing: border-box;
-    }
+        .calendar-day {
+            padding: 12px 0;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            box-sizing: border-box;
+        }
 
-    .calendar-day:hover {
-        background: #007bff;
-        color: white;
-    }
+        .calendar-day:hover {
+            background: #007bff;
+            color: white;
+        }
 
-    .calendar-day.selected {
-        background: #28a745;
-        color: white;
-    }
+        .calendar-day.selected {
+            background: #28a745;
+            color: white;
+        }
 
-    .calendar-day.other-month {
-        color: #999;
-        background: #f8f9fa;
-    }
+        .calendar-day.other-month {
+            color: #999;
+            background: #f8f9fa;
+        }
 
-    .calendar-day.today {
-        background: #ffc107;
-        color: #000;
-        font-weight: bold;
-    }
+        .calendar-day.today {
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+        }
 
-    .calendar-actions {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 15px;
-        /* FIXED: Make actions sticky at bottom */
-        position: sticky;
-        bottom: 0;
-        background: white;
-        padding: 10px 0;
-        border-top: 1px solid #eee;
-    }
+        .calendar-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+        }
 
-    .today-btn, .clear-btn {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin: 0 5px;
-        font-size: 14px;
-    }
+        .today-btn, .clear-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 14px;
+        }
 
-    .today-btn:hover {
-        background: #545b62;
-    }
+        .today-btn:hover {
+            background: #545b62;
+        }
 
-    .clear-btn {
-        background: #dc3545;
-    }
+        .clear-btn {
+            background: #dc3545;
+        }
 
-    .clear-btn:hover {
-        background: #c82333;
-    }
+        .clear-btn:hover {
+            background: #c82333;
+        }
 
-    /* FIXED: Custom scrollbar styling for better appearance */
-    .ethiopian-calendar-dropdown::-webkit-scrollbar {
-        width: 8px;
-    }
+        .ethiopian-calendar-dropdown::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .ethiopian-calendar-dropdown::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
+        .ethiopian-calendar-dropdown::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
 
-    .ethiopian-calendar-dropdown::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 4px;
-    }
+        .ethiopian-calendar-dropdown::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
 
-    .ethiopian-calendar-dropdown::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+        .ethiopian-calendar-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
 
+    <!-- Replace the entire Ethiopian Calendar script section with this code -->
     <script>
-    class EthiopianDatePicker {
-        constructor(inputId, calendarId) {
-            this.input = document.getElementById(inputId);
-            this.calendarElement = document.getElementById(calendarId);
-            this.targetInput = document.getElementById(this.input.dataset.target);
-            this.isOpen = false;
-            this.currentDate = this.getCurrentEthiopianDate();
-            this.selectedDate = { ...this.currentDate };
-            
-            this.init();
-        }
-        
-        getCurrentEthiopianDate() {
-            const now = new Date();
-            if (window.EthiopicCalendar) {
-                const ethDate = window.EthiopicCalendar.toEthiopic(
-                    now.getFullYear(), 
-                    now.getMonth() + 1, 
-                    now.getDate()
-                );
-                return ethDate;
+        class EthiopianDatePicker {
+            constructor(inputId, calendarId) {
+                this.input = document.getElementById(inputId);
+                this.calendarElement = document.getElementById(calendarId);
+                this.targetInput = document.getElementById(this.input.dataset.target);
+                this.isOpen = false;
+                this.currentDate = this.getCurrentEthiopianDate();
+                this.selectedDate = { ...this.currentDate };
+                
+                this.init();
             }
             
-            // Fallback calculation (more accurate)
-            const gregorian = new Date();
-            let ethiopianYear = gregorian.getFullYear() - 8;
-            let ethiopianMonth = gregorian.getMonth() + 1;
-            let ethiopianDay = gregorian.getDate();
-            
-            // Adjust for Ethiopian calendar offset (7-8 years and different month start)
-            if (gregorian.getMonth() <= 7) { // January to August
-                ethiopianYear--;
-                ethiopianMonth += 4;
-            } else { // September to December
-                ethiopianMonth -= 8;
-            }
-            
-            // Handle Pagume (13th month) - September 11/12 is Ethiopian New Year
-            if (gregorian.getMonth() === 8) { // September
-                if (gregorian.getDate() < 11) {
-                    ethiopianMonth = 13;
-                    ethiopianDay += 10; // Days in Pagume adjustment
+            getCurrentEthiopianDate() {
+                const now = new Date();
+                const gYear = now.getFullYear();
+                const gMonth = now.getMonth() + 1;
+                const gDay = now.getDate();
+                
+                if (window.EthiopicCalendar) {
+                    const ethDate = window.EthiopicCalendar.toEthiopic(gYear, gMonth, gDay);
+                    return ethDate;
+                }
+                
+                // Manual conversion calculation
+                const ethiopianNewYear = (gYear % 4 === 3) ? 12 : 11;
+                
+                if (gMonth < 9 || (gMonth === 9 && gDay < ethiopianNewYear)) {
+                    return {
+                        year: gYear - 8,
+                        month: gMonth + 4,
+                        day: gDay
+                    };
+                } else {
+                    const newYearDate = new Date(gYear, 8, ethiopianNewYear);
+                    const currentDate = new Date(gYear, gMonth - 1, gDay);
+                    const diffTime = currentDate - newYearDate;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    const ethYear = gYear - 7;
+                    const ethMonth = Math.floor(diffDays / 30) + 1;
+                    const ethDay = (diffDays % 30) + 1;
+                    
+                    return {
+                        year: ethYear,
+                        month: Math.min(13, ethMonth),
+                        day: Math.min(30, ethDay)
+                    };
                 }
             }
             
-            return {
-                year: ethiopianYear,
-                month: Math.max(1, Math.min(13, ethiopianMonth)),
-                day: Math.max(1, Math.min(30, ethiopianDay))
-            };
-        }
-        
-        getDaysInMonth(year, month) {
-            if (month === 13) {
-                return (year % 4 === 3) ? 6 : 5; // Leap year in Ethiopian calendar
-            }
-            return 30;
-        }
-        
-        getFirstDayOfMonth(year, month) {
-            // Simple calculation for day of week (0 = Sunday, 6 = Saturday)
-            // This is an approximation - for exact calculation, use the ethiopic-calendar library
-            const baseDate = new Date();
-            return baseDate.getDay();
-        }
-        
-        getEthiopianMonthName(month) {
-            const months = [
-                'መስከረም', 'ጥቅምት', 'ኅዳር', 'ታህሳስ', 
-                'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዝያ', 
-                'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጷጉሜ'
-            ];
-            return months[month - 1] || '';
-        }
-        
-        getDayNames() {
-            return ['ሰ', 'ማ', 'ረ', 'ሐ', 'ዓ', 'ቅ', 'እ'];
-        }
-        
-        getMonthsList() {
-            return [
-                {value: 1, name: 'መስከረም'}, {value: 2, name: 'ጥቅምት'}, 
-                {value: 3, name: 'ኅዳር'}, {value: 4, name: 'ታህሳስ'}, 
-                {value: 5, name: 'ጥር'}, {value: 6, name: 'የካቲት'}, 
-                {value: 7, name: 'መጋቢት'}, {value: 8, name: 'ሚያዝያ'}, 
-                {value: 9, name: 'ግንቦት'}, {value: 10, name: 'ሰኔ'}, 
-                {value: 11, name: 'ሐምሌ'}, {value: 12, name: 'ነሐሴ'}, 
-                {value: 13, name: 'ጷጉሜ'}
-            ];
-        }
-        
-        getYearsList() {
-            const currentYear = this.currentDate.year;
-            const years = [];
-            for (let i = currentYear - 10; i <= currentYear + 10; i++) {
-                years.push(i);
-            }
-            return years;
-        }
-        
-        renderCalendar() {
-            if (this.currentDate.month < 1) this.currentDate.month = 1;
-            if (this.currentDate.month > 13) this.currentDate.month = 13;
-            
-            const monthName = this.getEthiopianMonthName(this.currentDate.month);
-            const dayNames = this.getDayNames();
-            const daysInMonth = this.getDaysInMonth(this.currentDate.year, this.currentDate.month);
-            const months = this.getMonthsList();
-            const years = this.getYearsList();
-            
-            const firstDayOfWeek = this.getFirstDayOfMonth(this.currentDate.year, this.currentDate.month);
-            
-            let calendarHTML = `
-                <div class="ethiopian-calendar">
-                    <div class="calendar-header">
-                        <button type="button" class="calendar-nav-btn prev-year" title="Previous Year">‹‹</button>
-                        <button type="button" class="calendar-nav-btn prev-month" title="Previous Month">‹</button>
-                        <span class="calendar-title">${monthName} ${this.currentDate.year}</span>
-                        <button type="button" class="calendar-nav-btn next-month" title="Next Month">›</button>
-                        <button type="button" class="calendar-nav-btn next-year" title="Next Year">››</button>
-                    </div>
-                    
-                    <div class="year-month-selectors">
-                        <select class="year-selector">
-                            ${years.map(year => 
-                                `<option value="${year}" ${year === this.currentDate.year ? 'selected' : ''}>${year}</option>`
-                            ).join('')}
-                        </select>
-                        <select class="month-selector">
-                            ${months.map(month => 
-                                `<option value="${month.value}" ${month.value === this.currentDate.month ? 'selected' : ''}>${month.name}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    
-                    <div class="calendar-grid">
-            `;
-            
-            // Day headers
-            dayNames.forEach(day => {
-                calendarHTML += `<div class="calendar-day-header">${day}</div>`;
-            });
-            
-            // Empty cells for days before the first day of the month
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                calendarHTML += `<div class="calendar-day other-month">&nbsp;</div>`;
-            }
-            
-            // Days of the month
-            for (let day = 1; day <= daysInMonth; day++) {
-                const isSelected = this.selectedDate && 
-                                this.selectedDate.year === this.currentDate.year && 
-                                this.selectedDate.month === this.currentDate.month && 
-                                this.selectedDate.day === day;
+            getCurrentGregorianDateTime() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
                 
-                const selectedClass = isSelected ? 'selected' : '';
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+            
+            getDaysInMonth(year, month) {
+                if (month === 13) {
+                    return (year % 4 === 3) ? 6 : 5;
+                }
+                return 30;
+            }
+            
+            getFirstDayOfMonth(year, month) {
+                return new Date().getDay();
+            }
+            
+            getEthiopianMonthName(month) {
+                const months = [
+                    'መስከረም', 'ጥቅምት', 'ኅዳር', 'ታህሳስ', 
+                    'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዝያ', 
+                    'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጷጉሜ'
+                ];
+                return months[month - 1] || '';
+            }
+            
+            getDayNames() {
+                return ['ሰ', 'ማ', 'ረ', 'ሐ', 'ዓ', 'ቅ', 'እ'];
+            }
+            
+            getMonthsList() {
+                return [
+                    {value: 1, name: 'መስከረም'}, {value: 2, name: 'ጥቅምት'}, 
+                    {value: 3, name: 'ኅዳር'}, {value: 4, name: 'ታህሳስ'}, 
+                    {value: 5, name: 'ጥር'}, {value: 6, name: 'የካቲት'}, 
+                    {value: 7, name: 'መጋቢት'}, {value: 8, name: 'ሚያዝያ'}, 
+                    {value: 9, name: 'ግንቦት'}, {value: 10, name: 'ሰኔ'}, 
+                    {value: 11, name: 'ሐምሌ'}, {value: 12, name: 'ነሐሴ'}, 
+                    {value: 13, name: 'ጷጉሜ'}
+                ];
+            }
+            
+            getYearsList() {
+                const currentYear = this.currentDate.year;
+                const years = [];
+                for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+                    years.push(i);
+                }
+                return years;
+            }
+            
+            renderCalendar() {
+                if (this.currentDate.month < 1) this.currentDate.month = 1;
+                if (this.currentDate.month > 13) this.currentDate.month = 13;
+                
+                const monthName = this.getEthiopianMonthName(this.currentDate.month);
+                const dayNames = this.getDayNames();
+                const daysInMonth = this.getDaysInMonth(this.currentDate.year, this.currentDate.month);
+                const months = this.getMonthsList();
+                const years = this.getYearsList();
+                
+                const firstDayOfWeek = this.getFirstDayOfMonth(this.currentDate.year, this.currentDate.month);
+                
+                let calendarHTML = `
+                    <div class="ethiopian-calendar">
+                        <div class="calendar-header">
+                            <button type="button" class="calendar-nav-btn prev-year" title="Previous Year">‹‹</button>
+                            <button type="button" class="calendar-nav-btn prev-month" title="Previous Month">‹</button>
+                            <span class="calendar-title">${monthName} ${this.currentDate.year}</span>
+                            <button type="button" class="calendar-nav-btn next-month" title="Next Month">›</button>
+                            <button type="button" class="calendar-nav-btn next-year" title="Next Year">››</button>
+                        </div>
+                        
+                        <div class="year-month-selectors">
+                            <select class="year-selector">
+                                ${years.map(year => 
+                                    `<option value="${year}" ${year === this.currentDate.year ? 'selected' : ''}>${year}</option>`
+                                ).join('')}
+                            </select>
+                            <select class="month-selector">
+                                ${months.map(month => 
+                                    `<option value="${month.value}" ${month.value === this.currentDate.month ? 'selected' : ''}>${month.name}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="calendar-grid">
+                `;
+                
+                // Day headers
+                dayNames.forEach(day => {
+                    calendarHTML += `<div class="calendar-day-header">${day}</div>`;
+                });
+                
+                // Empty cells for days before the first day of the month
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    calendarHTML += `<div class="calendar-day other-month">&nbsp;</div>`;
+                }
+                
+                // Days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const isSelected = this.selectedDate && 
+                                    this.selectedDate.year === this.currentDate.year && 
+                                    this.selectedDate.month === this.currentDate.month && 
+                                    this.selectedDate.day === day;
+                    const isToday = this.currentDate.year === this.currentDate.year && 
+                                this.currentDate.month === this.currentDate.month && 
+                                day === this.currentDate.day;
+                    
+                    const selectedClass = isSelected ? 'selected' : '';
+                    const todayClass = isToday ? 'today' : '';
+                    
+                    calendarHTML += `
+                        <button type="button" class="calendar-day ${selectedClass} ${todayClass}" 
+                                data-day="${day}" 
+                                data-month="${this.currentDate.month}" 
+                                data-year="${this.currentDate.year}">
+                            ${day}
+                        </button>
+                    `;
+                }
+                
+                // Fill remaining cells
+                const totalCells = 42;
+                const filledCells = firstDayOfWeek + daysInMonth;
+                const remainingCells = Math.max(0, totalCells - filledCells);
+                
+                for (let i = 0; i < remainingCells; i++) {
+                    calendarHTML += `<div class="calendar-day other-month">&nbsp;</div>`;
+                }
                 
                 calendarHTML += `
-                    <button type="button" class="calendar-day ${selectedClass}" 
-                            data-day="${day}" 
-                            data-month="${this.currentDate.month}" 
-                            data-year="${this.currentDate.year}">
-                        ${day}
-                    </button>
+                        </div>
+                        
+                        <div class="calendar-actions">
+                            <button type="button" class="today-btn">Today</button>
+                            <button type="button" class="clear-btn">Clear</button>
+                        </div>
+                    </div>
                 `;
+                
+                this.calendarElement.innerHTML = calendarHTML;
+                this.attachEventListeners();
             }
             
-            // Fill remaining cells
-            const totalCells = 42;
-            const filledCells = firstDayOfWeek + daysInMonth;
-            const remainingCells = Math.max(0, totalCells - filledCells);
-            
-            for (let i = 0; i < remainingCells; i++) {
-                calendarHTML += `<div class="calendar-day other-month">&nbsp;</div>`;
-            }
-            
-            calendarHTML += `
-                    </div>
-                    
-                    <div class="calendar-actions">
-                        <button type="button" class="today-btn">Today</button>
-                        <button type="button" class="clear-btn">Clear</button>
-                    </div>
-                </div>
-            `;
-            
-            this.calendarElement.innerHTML = calendarHTML;
-            this.attachEventListeners();
-        }
-        
-        attachEventListeners() {
-            const stopPropagation = (e) => e.stopPropagation();
-            
-            // Navigation buttons
-            this.calendarElement.querySelector('.prev-year').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.currentDate.year--;
-                this.renderCalendar();
-            });
-            
-            this.calendarElement.querySelector('.prev-month').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.navigateMonth(-1);
-            });
-            
-            this.calendarElement.querySelector('.next-month').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.navigateMonth(1);
-            });
-            
-            this.calendarElement.querySelector('.next-year').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.currentDate.year++;
-                this.renderCalendar();
-            });
-            
-            // Year selector
-            this.calendarElement.querySelector('.year-selector').addEventListener('change', (e) => {
-                e.stopPropagation();
-                this.currentDate.year = parseInt(e.target.value);
-                this.renderCalendar();
-            });
-            
-            // Month selector
-            this.calendarElement.querySelector('.month-selector').addEventListener('change', (e) => {
-                e.stopPropagation();
-                const newMonth = parseInt(e.target.value);
-                if (newMonth >= 1 && newMonth <= 13) {
-                    this.currentDate.month = newMonth;
-                    this.currentDate.day = 1;
+            attachEventListeners() {
+                const stopPropagation = (e) => e.stopPropagation();
+                
+                // Navigation buttons
+                this.calendarElement.querySelector('.prev-year').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.currentDate.year--;
                     this.renderCalendar();
-                }
-            });
-            
-            // Day selection
-            setTimeout(() => {
-                const dayButtons = this.calendarElement.querySelectorAll('.calendar-day:not(.other-month)');
-                dayButtons.forEach(dayBtn => {
-                    dayBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const day = parseInt(dayBtn.textContent);
-                        const month = parseInt(dayBtn.dataset.month);
-                        const year = parseInt(dayBtn.dataset.year);
-                        this.selectDate(year, month, day);
-                    });
                 });
-            }, 0);
-            
-            // Today button
-            this.calendarElement.querySelector('.today-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.currentDate = this.getCurrentEthiopianDate();
-                this.selectDate(this.currentDate.year, this.currentDate.month, this.currentDate.day);
-            });
-            
-            // Clear button
-            this.calendarElement.querySelector('.clear-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.input.value = '';
-                this.targetInput.value = '';
-                this.selectedDate = null;
-                this.hideCalendar();
-            });
-            
-            this.calendarElement.addEventListener('click', stopPropagation);
-        }
-        
-        navigateMonth(direction) {
-            let newMonth = this.currentDate.month + direction;
-            let newYear = this.currentDate.year;
-            
-            if (newMonth > 13) {
-                newMonth = 1;
-                newYear++;
-            } else if (newMonth < 1) {
-                newMonth = 13;
-                newYear--;
+                
+                this.calendarElement.querySelector('.prev-month').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.navigateMonth(-1);
+                });
+                
+                this.calendarElement.querySelector('.next-month').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.navigateMonth(1);
+                });
+                
+                this.calendarElement.querySelector('.next-year').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.currentDate.year++;
+                    this.renderCalendar();
+                });
+                
+                // Year selector
+                this.calendarElement.querySelector('.year-selector').addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    this.currentDate.year = parseInt(e.target.value);
+                    this.renderCalendar();
+                });
+                
+                // Month selector
+                this.calendarElement.querySelector('.month-selector').addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    const newMonth = parseInt(e.target.value);
+                    if (newMonth >= 1 && newMonth <= 13) {
+                        this.currentDate.month = newMonth;
+                        this.currentDate.day = 1;
+                        this.renderCalendar();
+                    }
+                });
+                
+                // Day selection
+                setTimeout(() => {
+                    const dayButtons = this.calendarElement.querySelectorAll('.calendar-day:not(.other-month)');
+                    dayButtons.forEach(dayBtn => {
+                        dayBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const day = parseInt(dayBtn.textContent);
+                            const month = parseInt(dayBtn.dataset.month);
+                            const year = parseInt(dayBtn.dataset.year);
+                            this.selectDate(year, month, day);
+                        });
+                    });
+                }, 0);
+                
+                // Today button
+                this.calendarElement.querySelector('.today-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.currentDate = this.getCurrentEthiopianDate();
+                    this.selectDate(this.currentDate.year, this.currentDate.month, this.currentDate.day);
+                });
+                
+                // Clear button
+                this.calendarElement.querySelector('.clear-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.input.value = '';
+                    this.targetInput.value = '';
+                    this.selectedDate = null;
+                    this.hideCalendar();
+                });
+                
+                this.calendarElement.addEventListener('click', stopPropagation);
             }
             
-            this.currentDate = { 
-                year: newYear, 
-                month: Math.max(1, Math.min(13, newMonth)), 
-                day: 1 
-            };
-            this.renderCalendar();
-        }
-        
-        selectDate(year, month, day) {
-            if (year && month >= 1 && month <= 13 && day >= 1 && day <= 30) {
-                this.selectedDate = { year, month, day };
-                this.currentDate = { year, month, day };
+            navigateMonth(direction) {
+                let newMonth = this.currentDate.month + direction;
+                let newYear = this.currentDate.year;
                 
-                const formattedEthiopianDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                this.input.value = formattedEthiopianDate;
+                if (newMonth > 13) {
+                    newMonth = 1;
+                    newYear++;
+                } else if (newMonth < 1) {
+                    newMonth = 13;
+                    newYear--;
+                }
                 
-                const gregorianDate = this.ethiopianToGregorian(year, month, day);
-                if (gregorianDate) {
-                    // Use current time but the selected date
+                this.currentDate = { 
+                    year: newYear, 
+                    month: Math.max(1, Math.min(13, newMonth)), 
+                    day: 1 
+                };
+                this.renderCalendar();
+            }
+            
+            selectDate(year, month, day) {
+                if (year && month >= 1 && month <= 13 && day >= 1 && day <= 30) {
+                    this.selectedDate = { year, month, day };
+                    this.currentDate = { year, month, day };
+                    
+                    const formattedEthiopianDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    this.input.value = formattedEthiopianDate;
+                    
+                    // Get current time
                     const now = new Date();
                     const hours = now.getHours().toString().padStart(2, '0');
                     const minutes = now.getMinutes().toString().padStart(2, '0');
-                    const gregorianFormatted = `${gregorianDate.year}-${gregorianDate.month.toString().padStart(2, '0')}-${gregorianDate.day.toString().padStart(2, '0')}T${hours}:${minutes}`;
-                    this.targetInput.value = gregorianFormatted;
+                    
+                    // For Ethiopian calendar, send Ethiopian date directly to backend
+                    // Backend will handle conversion
+                    this.targetInput.value = `${formattedEthiopianDate}T${hours}:${minutes}`;
                 }
-            }
-            
-            this.hideCalendar();
-        }
-        
-        ethiopianToGregorian(year, month, day) {
-            if (window.EthiopicCalendar) {
-                return window.EthiopicCalendar.toGregorian(year, month, day);
-            }
-            
-            // Improved fallback conversion
-            let gregYear = year + 8;
-            let gregMonth = month;
-            let gregDay = day;
-            
-            if (month >= 1 && month <= 4) {
-                gregYear++;
-                gregMonth += 8;
-            } else if (month >= 5 && month <= 13) {
-                gregMonth -= 4;
-            }
-            
-            // Adjust for Pagume (13th month)
-            if (month === 13) {
-                gregMonth = 9; // September
-                if (day <= 5) {
-                    gregDay = day + 5; // September 6-11
-                } else {
-                    gregDay = day - 5; // September 6-10
-                }
-            }
-            
-            return {
-                year: gregYear,
-                month: Math.max(1, Math.min(12, gregMonth)),
-                day: Math.max(1, Math.min(31, gregDay))
-            };
-        }
-        
-        showCalendar() {
-            this.calendarElement.style.display = 'block';
-            this.isOpen = true;
-            this.renderCalendar();
-            this.calendarElement.scrollTop = 0;
-        }
-        
-        hideCalendar() {
-            this.calendarElement.style.display = 'none';
-            this.isOpen = false;
-        }
-        
-        toggleCalendar() {
-            if (this.isOpen) {
-                this.hideCalendar();
-            } else {
-                this.showCalendar();
-            }
-        }
-        
-        init() {
-            // Set initial Ethiopian date if not already set
-            if (!this.input.value) {
-                const currentDate = this.getCurrentEthiopianDate();
-                if (currentDate.month >= 1 && currentDate.month <= 13) {
-                    this.selectDate(currentDate.year, currentDate.month, currentDate.day);
-                }
-            }
-            
-            this.input.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.toggleCalendar();
-            });
-            
-            document.addEventListener('click', (e) => {
-                if (this.isOpen && 
-                    !this.calendarElement.contains(e.target) && 
-                    e.target !== this.input) {
-                    this.hideCalendar();
-                }
-            });
-        }
-    }
-
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof EthiopicCalendar === 'undefined') {
-            console.warn('Ethiopic calendar library not loaded, using fallback conversion');
-        }
-        
-        // Create and add hidden date_type field for backend if it doesn't exist
-        let dateTypeInput = document.getElementById('date_type_field');
-        if (!dateTypeInput) {
-            dateTypeInput = document.createElement('input');
-            dateTypeInput.type = 'hidden';
-            dateTypeInput.name = 'date_type';
-            dateTypeInput.id = 'date_type_field';
-            dateTypeInput.value = 'EC'; // Default to Ethiopian calendar
-            
-            const form = document.querySelector('form');
-            if (form) {
-                form.appendChild(dateTypeInput);
-            }
-        }
-        
-        // Initialize date pickers
-        const appointmentPicker = new EthiopianDatePicker('ec_appointment_date', 'ec_appointment_calendar');
-        const pickupPicker = new EthiopianDatePicker('ec_pickup_date', 'ec_pickup_calendar');
-        
-        // Calendar type toggle with backend compatibility
-        const calendarTypeSelect = document.getElementById('calendar_type');
-        if (calendarTypeSelect) {
-            calendarTypeSelect.addEventListener('change', function() {
-                const isEC = this.value === 'ec';
                 
-                // Update the date_type hidden field for backend - FIXED
-                dateTypeInput.value = isEC ? 'EC' : 'GC';
-                console.log('Date type set to:', dateTypeInput.value);
+                this.hideCalendar();
+            }
+            
+            showCalendar() {
+                this.calendarElement.style.display = 'block';
+                this.isOpen = true;
+                this.renderCalendar();
+                this.calendarElement.scrollTop = 0;
+            }
+            
+            hideCalendar() {
+                this.calendarElement.style.display = 'none';
+                this.isOpen = false;
+            }
+            
+            toggleCalendar() {
+                if (this.isOpen) {
+                    this.hideCalendar();
+                } else {
+                    this.showCalendar();
+                }
+            }
+            
+            init() {
+                // Always set initial Ethiopian date to current date
+                const currentDate = this.getCurrentEthiopianDate();
+                this.selectDate(currentDate.year, currentDate.month, currentDate.day);
+                
+                this.input.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleCalendar();
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (this.isOpen && 
+                        !this.calendarElement.contains(e.target) && 
+                        e.target !== this.input) {
+                        this.hideCalendar();
+                    }
+                });
+            }
+        }
+
+        // Date Manager to handle all date operations
+        class DateManager {
+            constructor() {
+                this.calendarType = 'EC';
+                this.dateTypeField = document.getElementById('date_type_field');
+                this.calendarTypeSelect = document.getElementById('calendar_type');
+                this.appointmentPicker = null;
+                this.pickupPicker = null;
+                
+                this.init();
+            }
+            
+            init() {
+                // Initialize date pickers
+                this.appointmentPicker = new EthiopianDatePicker('ec_appointment_date', 'ec_appointment_calendar');
+                this.pickupPicker = new EthiopianDatePicker('ec_pickup_date', 'ec_pickup_calendar');
+                
+                // Set initial dates
+                this.setInitialDates();
+                
+                // Setup calendar type change listener
+                this.setupCalendarTypeListener();
+                
+                // Setup form submission handler
+                this.setupFormSubmission();
+            }
+            
+            setInitialDates() {
+                // Set appointment date to current date
+                const currentEthDate = this.appointmentPicker.getCurrentEthiopianDate();
+                this.appointmentPicker.selectDate(currentEthDate.year, currentEthDate.month, currentEthDate.day);
+                
+                // Set pickup date to current Ethiopian date
+                this.pickupPicker.selectDate(currentEthDate.year, currentEthDate.month, currentEthDate.day);
+            }
+            
+            setupCalendarTypeListener() {
+                if (this.calendarTypeSelect) {
+                    this.calendarTypeSelect.addEventListener('change', (e) => {
+                        this.calendarType = e.target.value;
+                        this.dateTypeField.value = this.calendarType;
+                        
+                        console.log('Calendar type changed to:', this.calendarType);
+                        console.log('Date type field value:', this.dateTypeField.value);
+                        
+                        this.toggleCalendarDisplay();
+                        this.syncDates();
+                    });
+                }
+            }
+            
+            toggleCalendarDisplay() {
+                const isEC = this.calendarType === 'EC';
                 
                 // Toggle visibility
                 document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
@@ -996,194 +990,98 @@
                 document.querySelectorAll('.ethiopian-date-picker-container').forEach(container => {
                     container.style.display = isEC ? 'block' : 'none';
                 });
+            }
+            
+            syncDates() {
+                if (this.calendarType === 'GC') {
+                    // Switching to Gregorian - set current date/time
+                    const currentDateTime = this.appointmentPicker.getCurrentGregorianDateTime();
+                    document.getElementById('gc_appointment_date').value = currentDateTime;
+                    
+                    // Set pickup date to current date + 7 days in Gregorian
+                    const pickupDate = new Date();
+                    pickupDate.setDate(pickupDate.getDate() + 7);
+                    const pickupYear = pickupDate.getFullYear();
+                    const pickupMonth = String(pickupDate.getMonth() + 1).padStart(2, '0');
+                    const pickupDay = String(pickupDate.getDate()).padStart(2, '0');
+                    document.getElementById('gc_pickup_date').value = `${pickupYear}-${pickupMonth}-${pickupDay}T12:00`;
+                } else {
+                    // Switching to Ethiopian - use the Ethiopian pickers
+                    const currentEthDate = this.appointmentPicker.getCurrentEthiopianDate();
+                    this.appointmentPicker.selectDate(currentEthDate.year, currentEthDate.month, currentEthDate.day);
+                    this.pickupPicker.selectDate(currentEthDate.year, currentEthDate.month, currentEthDate.day);
+                }
+            }
+            
+            setupFormSubmission() {
+                const form = document.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        // Ensure all date fields are properly set before submission
+                        this.prepareFormData();
+                        
+                        // Validate required dates
+                        if (!this.validateDates()) {
+                            e.preventDefault();
+                            return;
+                        }
+                        
+                        console.log('Form submission - Date type:', this.dateTypeField.value);
+                        console.log('Appointment date:', document.getElementById('gc_appointment_date').value);
+                        console.log('Pickup date:', document.getElementById('gc_pickup_date').value);
+                    });
+                }
+            }
+            
+            prepareFormData() {
+                // Always ensure date_type is set correctly
+                this.dateTypeField.value = this.calendarType;
                 
-                // If switching to Gregorian, populate Gregorian inputs with converted dates
-                if (!isEC) {
+                if (this.calendarType === 'EC') {
+                    // For Ethiopian dates, ensure both Ethiopian and Gregorian fields are set
                     const appointmentEthDate = document.getElementById('ec_appointment_date').value;
                     const pickupEthDate = document.getElementById('ec_pickup_date').value;
                     
-                    if (appointmentEthDate) {
-                        const [year, month, day] = appointmentEthDate.split('-').map(Number);
-                        const gcDate = appointmentPicker.ethiopianToGregorian(year, month, day);
+                    if (appointmentEthDate && !document.getElementById('gc_appointment_date').value) {
                         const now = new Date();
                         const hours = now.getHours().toString().padStart(2, '0');
                         const minutes = now.getMinutes().toString().padStart(2, '0');
-                        const gcFormatted = `${gcDate.year}-${gcDate.month.toString().padStart(2, '0')}-${gcDate.day.toString().padStart(2, '0')}T${hours}:${minutes}`;
-                        document.getElementById('gc_appointment_date').value = gcFormatted;
+                        document.getElementById('gc_appointment_date').value = `${appointmentEthDate}T${hours}:${minutes}`;
                     }
                     
-                    if (pickupEthDate) {
-                        const [year, month, day] = pickupEthDate.split('-').map(Number);
-                        const gcDate = pickupPicker.ethiopianToGregorian(year, month, day);
-                        const gcFormatted = `${gcDate.year}-${gcDate.month.toString().padStart(2, '0')}-${gcDate.day.toString().padStart(2, '0')}T12:00`;
-                        document.getElementById('gc_pickup_date').value = gcFormatted;
+                    if (pickupEthDate && !document.getElementById('gc_pickup_date').value) {
+                        document.getElementById('gc_pickup_date').value = `${pickupEthDate}T12:00`;
                     }
-                } else {
-                    // If switching to Ethiopian, ensure we have proper Ethiopian dates
-                    const appointmentGcDate = document.getElementById('gc_appointment_date').value;
-                    const pickupGcDate = document.getElementById('gc_pickup_date').value;
-                    
-                    if (appointmentGcDate) {
-                        const [year, month, day] = appointmentGcDate.split('T')[0].split('-').map(Number);
-                        const ethDate = gregorianToEthiopian(year, month, day);
-                        if (ethDate) {
-                            document.getElementById('ec_appointment_date').value = 
-                                `${ethDate.year}-${ethDate.month.toString().padStart(2, '0')}-${ethDate.day.toString().padStart(2, '0')}`;
-                        }
-                    }
-                    
-                    if (pickupGcDate) {
-                        const [year, month, day] = pickupGcDate.split('T')[0].split('-').map(Number);
-                        const ethDate = gregorianToEthiopian(year, month, day);
-                        if (ethDate) {
-                            document.getElementById('ec_pickup_date').value = 
-                                `${ethDate.year}-${ethDate.month.toString().padStart(2, '0')}-${ethDate.day.toString().padStart(2, '0')}`;
-                        }
-                    }
-                }
-            });
-            
-            // Set default to Ethiopian calendar and trigger change
-            calendarTypeSelect.value = 'ec';
-            calendarTypeSelect.dispatchEvent(new Event('change'));
-        }
-        
-        // Gregorian to Ethiopian conversion function
-        function gregorianToEthiopian(year, month, day) {
-            if (window.EthiopicCalendar) {
-                return window.EthiopicCalendar.toEthiopic(year, month, day);
-            }
-            
-            // Fallback conversion
-            let ethYear = year - 8;
-            let ethMonth = month;
-            let ethDay = day;
-            
-            if (month <= 8) { // January to August
-                ethYear--;
-                ethMonth += 4;
-            } else { // September to December
-                ethMonth -= 8;
-            }
-            
-            // Adjust for Pagume and Ethiopian New Year
-            if (month === 9) { // September
-                if (day < 11) {
-                    ethYear--;
-                    ethMonth = 13;
-                    ethDay = day + 20; // Adjust day for Pagume
-                } else {
-                    ethDay -= 10;
                 }
             }
             
-            return {
-                year: ethYear,
-                month: Math.max(1, Math.min(13, ethMonth)),
-                day: Math.max(1, Math.min(30, ethDay))
-            };
-        }
-        
-        // Form submission handler to ensure correct data structure
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Ensure date_type is set correctly before submission - FIXED
-                const calendarType = document.getElementById('calendar_type').value;
-                const dateTypeField = document.getElementById('date_type_field');
-                dateTypeField.value = calendarType === 'ec' ? 'EC' : 'GC';
-                
-                console.log('Form submission - Date type:', dateTypeField.value);
-                
-                // Validate that we have proper Gregorian dates for backend
+            validateDates() {
                 const appointmentDate = document.getElementById('gc_appointment_date').value;
                 const pickupDate = document.getElementById('gc_pickup_date').value;
                 
-                // If in EC mode, ensure we have converted the dates properly
-                if (calendarType === 'ec') {
-                    const appointmentEthDate = document.getElementById('ec_appointment_date').value;
-                    const pickupEthDate = document.getElementById('ec_pickup_date').value;
-                    
-                    if (appointmentEthDate && !appointmentDate) {
-                        const [year, month, day] = appointmentEthDate.split('-').map(Number);
-                        const gcDate = appointmentPicker.ethiopianToGregorian(year, month, day);
-                        if (gcDate) {
-                            const now = new Date();
-                            const hours = now.getHours().toString().padStart(2, '0');
-                            const minutes = now.getMinutes().toString().padStart(2, '0');
-                            const gcFormatted = `${gcDate.year}-${gcDate.month.toString().padStart(2, '0')}-${gcDate.day.toString().padStart(2, '0')}T${hours}:${minutes}`;
-                            document.getElementById('gc_appointment_date').value = gcFormatted;
-                        }
-                    }
-                    
-                    if (pickupEthDate && !pickupDate) {
-                        const [year, month, day] = pickupEthDate.split('-').map(Number);
-                        const gcDate = pickupPicker.ethiopianToGregorian(year, month, day);
-                        if (gcDate) {
-                            const gcFormatted = `${gcDate.year}-${gcDate.month.toString().padStart(2, '0')}-${gcDate.day.toString().padStart(2, '0')}T12:00`;
-                            document.getElementById('gc_pickup_date').value = gcFormatted;
-                        }
-                    }
-                }
-                
-                // Final validation
-                const finalAppointmentDate = document.getElementById('gc_appointment_date').value;
-                const finalPickupDate = document.getElementById('gc_pickup_date').value;
-                
-                if (!finalAppointmentDate) {
+                if (!appointmentDate) {
                     alert('Please select an appointment date');
-                    e.preventDefault();
-                    return;
+                    return false;
                 }
                 
-                if (!finalPickupDate) {
+                if (!pickupDate) {
                     alert('Please select a pickup date');
-                    e.preventDefault();
-                    return;
+                    return false;
                 }
                 
-                // Log for debugging
-                console.log('Submitting form with:', {
-                    date_type: dateTypeField.value,
-                    appointment_date: finalAppointmentDate,
-                    pickup_date: finalPickupDate
-                });
-            });
-        }
-        
-        // Function to handle manual Gregorian date input changes
-        function handleGregorianDateChange() {
-            const calendarType = document.getElementById('calendar_type').value;
-            if (calendarType === 'gc') {
-                // If in Gregorian mode and user manually changes the Gregorian date,
-                // we should update the Ethiopian display for consistency
-                const gcAppointmentDate = document.getElementById('gc_appointment_date').value;
-                const gcPickupDate = document.getElementById('gc_pickup_date').value;
-                
-                if (gcAppointmentDate) {
-                    const [year, month, day] = gcAppointmentDate.split('T')[0].split('-').map(Number);
-                    const ethDate = gregorianToEthiopian(year, month, day);
-                    if (ethDate) {
-                        document.getElementById('ec_appointment_date').value = 
-                            `${ethDate.year}-${ethDate.month.toString().padStart(2, '0')}-${ethDate.day.toString().padStart(2, '0')}`;
-                    }
-                }
-                
-                if (gcPickupDate) {
-                    const [year, month, day] = gcPickupDate.split('T')[0].split('-').map(Number);
-                    const ethDate = gregorianToEthiopian(year, month, day);
-                    if (ethDate) {
-                        document.getElementById('ec_pickup_date').value = 
-                            `${ethDate.year}-${ethDate.month.toString().padStart(2, '0')}-${ethDate.day.toString().padStart(2, '0')}`;
-                    }
-                }
+                return true;
             }
         }
-        
-        // Listen for changes on Gregorian date inputs
-        document.getElementById('gc_appointment_date')?.addEventListener('change', handleGregorianDateChange);
-        document.getElementById('gc_pickup_date')?.addEventListener('change', handleGregorianDateChange);
-    });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof EthiopicCalendar === 'undefined') {
+                console.warn('Ethiopic calendar library not loaded, using fallback conversion');
+            }
+            
+            // Initialize the date manager
+            window.dateManager = new DateManager();
+        });
     </script>
 
     <script>
