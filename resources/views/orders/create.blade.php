@@ -639,7 +639,7 @@
             }
             
             getFirstDayOfMonth(year, month) {
-                return new Date().getDay();
+                 return (year + Math.floor(year / 4) + 2 * month + 6) % 7;
             }
             
             getEthiopianMonthName(month) {
