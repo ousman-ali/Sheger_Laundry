@@ -994,17 +994,12 @@
             
             syncDates() {
                 if (this.calendarType === 'GC') {
-                    // Switching to Gregorian - set current date/time
+                    // Switching to Gregorian - set current date/time for both dates
                     const currentDateTime = this.appointmentPicker.getCurrentGregorianDateTime();
                     document.getElementById('gc_appointment_date').value = currentDateTime;
                     
-                    // Set pickup date to current date + 7 days in Gregorian
-                    const pickupDate = new Date();
-                    pickupDate.setDate(pickupDate.getDate() + 7);
-                    const pickupYear = pickupDate.getFullYear();
-                    const pickupMonth = String(pickupDate.getMonth() + 1).padStart(2, '0');
-                    const pickupDay = String(pickupDate.getDate()).padStart(2, '0');
-                    document.getElementById('gc_pickup_date').value = `${pickupYear}-${pickupMonth}-${pickupDay}T12:00`;
+                    // Set pickup date to current date (not +7 days)
+                    document.getElementById('gc_pickup_date').value = currentDateTime;
                 } else {
                     // Switching to Ethiopian - use the Ethiopian pickers
                     const currentEthDate = this.appointmentPicker.getCurrentEthiopianDate();
