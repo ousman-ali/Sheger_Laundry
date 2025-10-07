@@ -430,7 +430,7 @@
                             </tbody>
                             @php $summary = app(\App\Services\PaymentService::class)->suggestedAmountForOrder($order->id); @endphp
                             <div class="overflow-x-auto">
-                                <table class="min-w-full border-collapse text-sm">
+                                <table class="w-[50%] border-collapse text-sm ml-auto">
                                     <tbody>
                                         <tr>
                                             <td class="p-2 font-medium text-right">Subtotal</td>

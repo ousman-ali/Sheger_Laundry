@@ -40,13 +40,21 @@
                                     <td class="p-2">{{ $b->is_active ? 'Yes' : 'No' }}</td>
                                     <td class="p-2">
                                         @can('edit_banks')
-                                            <a href="{{ route('banks.edit', $b) }}" class="text-blue-600 hover:underline">Edit</a>
+                                            <a href="{{ route('banks.edit', $b) }}" 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                            >
+                                                <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                            </a>
                                         @endcan
                                         @can('delete_banks')
                                             <form action="{{ route('banks.destroy', $b) }}" method="POST" class="inline" data-confirm="Delete this bank?" data-confirm-title="Please Confirm" data-confirm-ok="Delete" data-confirm-cancel="Cancel">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="ml-2 text-red-600 hover:underline">Delete</button>
+                                                <button 
+                                                    class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition"
+                                                >
+                                                     <x-heroicon-o-trash class="w-5 h-5 text-red-600" />
+                                                </button>
                                             </form>
                                         @endcan
                                     </td>

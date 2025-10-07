@@ -93,10 +93,18 @@
                                     <td class="p-2">{{ optional($o->created_at)->format('Y-m-d H:i') }}</td>
                                     <td class="p-2">
                                         @can('print_invoices')
-                                            <a href="{{ route('orders.invoice', $o) }}" target="_blank" class="text-blue-600 hover:underline">View/Print</a>
+                                            <a href="{{ route('orders.invoice', $o) }}" target="_blank" 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
+                                            >
+                                                <x-heroicon-o-printer class="w-4 h-4" />
+                                            </a>
                                         @endcan
                                         @can('export_invoices')
-                                            <a href="{{ route('orders.invoice.pdf', $o) }}" target="_blank" class="ml-2 text-blue-600 hover:underline">PDF</a>
+                                            <a href="{{ route('orders.invoice.pdf', $o) }}" target="_blank" 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-md transition"
+                                            >
+                                                <x-heroicon-o-document-text class="w-4 h-4" />
+                                            </a>
                                         @endcan
                                     </td>
                                 </tr>

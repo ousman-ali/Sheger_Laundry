@@ -84,13 +84,21 @@
                                     <td class="p-2">{{ \Illuminate\Support\Str::limit($group->description, 80) }}</td>
                                     <td class="p-2 flex gap-3 items-center">
                                         @can('edit_cloth_groups')
-                                            <a href="{{ route('clothing-groups.edit', $group) }}" class="text-blue-600">Edit</a>
+                                            <a href="{{ route('clothing-groups.edit', $group) }}" 
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                            >
+                                                <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                            </a>
                                         @endcan
                                         @can('delete_cloth_groups')
                                             <form action="{{ route('clothing-groups.destroy', $group) }}" method="POST" data-confirm="Delete this clothing group?" data-confirm-title="Please Confirm" data-confirm-ok="Delete" data-confirm-cancel="Cancel">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600">Delete</button>
+                                                <button type="submit" 
+                                                    class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition"
+                                                >
+                                                     <x-heroicon-o-trash class="w-5 h-5 text-red-600" />
+                                                </button>
                                             </form>
                                         @endcan
                                     </td>

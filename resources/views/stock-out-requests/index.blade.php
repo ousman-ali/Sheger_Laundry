@@ -76,7 +76,11 @@
                                     <td class="p-2">{{ optional($r->approved_at)->toDateTimeString() }}</td>
                                     <td class="p-2">{{ optional($r->created_at)->toDateTimeString() }}</td>
                                     <td class="p-2 flex flex-wrap gap-2 items-center">
-                                        <a href="{{ route('stock-out-requests.show', $r) }}" class="text-blue-600">View</a>
+                                        <a href="{{ route('stock-out-requests.show', $r) }}" 
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition"
+                                        >
+                                            <x-heroicon-o-eye class="w-5 h-5 text-blue-600" />
+                                        </a>
                                         @can('edit_stock_out_requests')
                                             @if(in_array($r->status, ['draft','rejected']))
                                                 <form action="{{ route('stock-out-requests.submit', $r) }}" method="POST">

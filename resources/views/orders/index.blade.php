@@ -193,9 +193,17 @@
                                         </td>
                                         <td class="p-2">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <a href="{{ route('orders.show', $order) }}" class="text-blue-600">View</a>
+                                                <a href="{{ route('orders.show', $order) }}" 
+                                                    class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition"
+                                                >
+                                                    <x-heroicon-o-eye class="w-5 h-5 text-blue-600" />
+                                                </a>
                                                 @can('edit_orders')
-                                                    <a href="{{ route('orders.edit', $order) }}" class="text-blue-600">Edit</a>
+                                                    <a href="{{ route('orders.edit', $order) }}" 
+                                                        class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                                    >
+                                                        <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                                    </a>
                                                 @endcan
                                                 @can('edit_orders')
                                                 <form action="{{ route('order-services.assign-orders') }}" method="POST" class="flex items-center gap-1">

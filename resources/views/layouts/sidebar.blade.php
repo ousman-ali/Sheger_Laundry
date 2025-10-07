@@ -119,7 +119,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm9 1.5V7h3.5L15 3.5zM8 9h8v2H8V9zm0 4h8v2H8v-2z"/></svg>
                 <span x-show="!sidebarCollapsed">Invoices</span>
             </a>
-            <a href="{{ route('payments.index') }}" title="Payments" aria-current="{{ request()->routeIs('payments.*') ? 'page' : 'false' }}" class="flex items-center px-7 py-1.5 rounded text-sm {{ request()->routeIs('payments.*') ? 'bg-blue-50 text-blue-900 font-semibold' : 'hover:bg-blue-50' }} mt-1" :class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
+            <a href="{{ route('payments.index') }}" title="Payments" aria-current="{{ request()->routeIs('payments.index') ? 'page' : 'false' }}" class="flex items-center px-7 py-1.5 rounded text-sm {{ request()->routeIs('payments.index') ? 'bg-blue-50 text-blue-900 font-semibold' : 'hover:bg-blue-50' }} mt-1" :class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v12H3z"/><path d="M3 10h18v2H3z"/></svg>
                 <span x-show="!sidebarCollapsed">Payments</span>
             </a>

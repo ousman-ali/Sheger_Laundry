@@ -76,13 +76,21 @@
                                     <td class="p-2">{{ optional($item->created_at)->toDateTimeString() }}</td>
                                     <td class="p-2 flex items-center gap-3">
                                         @can('edit_inventory')
-                                        <a href="{{ route('inventory.edit', $item) }}" class="text-blue-600">Edit</a>
+                                        <a href="{{ route('inventory.edit', $item) }}" 
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                        >
+                                            <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                        </a>
                                         @endcan
                                         @can('delete_inventory')
                                         <form action="{{ route('inventory.destroy', $item) }}" method="POST" data-confirm="Delete this item?" data-confirm-title="Please Confirm" data-confirm-ok="Delete" data-confirm-cancel="Cancel" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600">Delete</button>
+                                            <button type="submit" 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition"
+                                            >
+                                                 <x-heroicon-o-trash class="w-5 h-5 text-red-600" />
+                                            </button>
                                         </form>
                                         @endcan
                                     </td>

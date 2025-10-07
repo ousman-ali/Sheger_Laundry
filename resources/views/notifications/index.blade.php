@@ -88,14 +88,25 @@
                                     @role('Admin')<td class="p-2">{{ optional($n->user)->name ?? '—' }}</td>@endrole
                                     <td class="p-2">{{ $n->type }}</td>
                                     <td class="p-2">{{ $n->message }}</td>
-                                    <td class="p-2">@if($n->url)<a class="text-blue-600 hover:underline" href="{{ route('notifications.markRead', $n->id) }}">Open</a>@else — @endif</td>
+                                    <td class="p-2">@if($n->url)
+                                        <a 
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition" 
+                                            href="{{ route('notifications.markRead', $n->id) }}"
+                                        >
+                                            <x-heroicon-o-arrow-top-right-on-square class="w-4 h-4" />
+                                        </a>@else — @endif</td>
                                     <td class="p-2">{{ $n->is_read ? 'Read' : 'Unread' }}</td>
                                     <td class="p-2">{{ optional($n->created_at)->format('Y-m-d H:i') }}</td>
                                     <td class="p-2">
                                         <form method="POST" action="{{ route('notifications.destroy', $n->id) }}" data-confirm="Delete this notification?" data-confirm-title="Please Confirm" data-confirm-ok="Delete" data-confirm-cancel="Cancel">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="text-red-600 hover:underline" type="submit">Delete</button>
+                                            <button 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition" 
+                                                type="submit"
+                                            >
+                                                 <x-heroicon-o-trash class="w-5 h-5 text-red-600" />
+                                            </button>
                                         </form>
                                     </td>
                                 </tr>

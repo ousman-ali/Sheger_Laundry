@@ -61,9 +61,17 @@
                                     <td class="p-2">{{ $purchase->purchase_date }}</td>
                                     <td class="p-2">{{ number_format($purchase->total_price, 2) }}</td>
                                     <td class="p-2 flex gap-3">
-                                        <a href="{{ route('purchases.show', $purchase) }}" class="text-blue-600">View</a>
+                                        <a href="{{ route('purchases.show', $purchase) }}" 
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition"
+                                        >
+                                            <x-heroicon-o-eye class="w-5 h-5 text-blue-600" />
+                                        </a>
                                         @can('edit_purchases')
-                                            <a href="{{ route('purchases.edit', $purchase) }}" class="text-blue-600">Edit</a>
+                                            <a href="{{ route('purchases.edit', $purchase) }}" 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                            >
+                                                <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                            </a>
                                         @endcan
                                     </td>
                                 </tr>

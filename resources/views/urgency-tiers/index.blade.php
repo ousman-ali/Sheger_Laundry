@@ -70,13 +70,21 @@
                                     <td class="p-2">{{ optional($t->created_at)->toDateTimeString() }}</td>
                                     <td class="p-2 flex gap-3 items-center">
                                         @can('edit_urgency_tiers')
-                                            <a href="{{ route('urgency-tiers.edit', $t) }}" class="text-blue-600">Edit</a>
+                                            <a href="{{ route('urgency-tiers.edit', $t) }}" 
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                            >
+                                                <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                            </a>
                                         @endcan
                                         @can('delete_urgency_tiers')
                                             <form action="{{ route('urgency-tiers.destroy', $t) }}" method="POST" data-confirm="Delete this urgency tier?" data-confirm-title="Please Confirm" data-confirm-ok="Delete" data-confirm-cancel="Cancel">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600">Delete</button>
+                                                <button type="submit" 
+                                                    class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition"
+                                                >
+                                                     <x-heroicon-o-trash class="w-5 h-5 text-red-600" />
+                                                </button>
                                             </form>
                                         @endcan
                                     </td>

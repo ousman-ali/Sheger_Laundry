@@ -66,7 +66,11 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         @can('edit_users')
-                                        <a href="{{ route('users.edit', $user) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                        <a href="{{ route('users.edit', $user) }}" 
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-md transition"
+                                        >
+                                            <x-heroicon-o-pencil class="w-5 h-5 text-green-600" />
+                                        </a>
                                         @endcan
                                     </td>
                                 </tr>

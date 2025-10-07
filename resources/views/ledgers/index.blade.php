@@ -40,7 +40,12 @@
                                     <td class="p-2 text-right">{{ number_format($l->amount_received, 2) }}</td>
                                     <td class="p-2 text-right">{{ number_format($due, 2) }}</td>
                                     <td class="p-2">{{ ucfirst($l->status) }}</td>
-                                    <td class="p-2"><a class="text-blue-600" href="{{ route('orders.show', $l->order) }}">View</a></td>
+                                    <td class="p-2"><a 
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition" 
+                                        href="{{ route('orders.show', $l->order) }}"
+                                    >
+                                        <x-heroicon-o-eye class="w-5 h-5" />    
+                                    </a></td>
                                 </tr>
                             @endforeach
                         </tbody>

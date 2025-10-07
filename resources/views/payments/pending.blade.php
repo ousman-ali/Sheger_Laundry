@@ -73,10 +73,19 @@
                                     <td class="p-2 text-right">{{ number_format($due, 2) }}</td>
                                     <td class="p-2">
                                         @can('create_payments')
-                                            <button type="button" class="text-blue-600 hover:underline" @click="window.dispatchEvent(new CustomEvent('open-record-payment', { detail: { orderId: {{ $o->id }}, orderLabel: '{{ $o->order_id }} — {{ addslashes(optional($o->customer)->name) }}' } }))">Record Payment</button>
+                                            <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 px-2 h-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition"  
+                                                @click="window.dispatchEvent(new CustomEvent('open-record-payment', { detail: { orderId: {{ $o->id }}, orderLabel: '{{ $o->order_id }} — {{ addslashes(optional($o->customer)->name) }}' } }))"
+                                            >
+                                                <span>Pay</span> <x-heroicon-o-credit-card class="w-4 h-4" />
+                                            </button>
                                         @endcan
                                         @can('print_orders')
-                                            <a href="{{ route('orders.invoice', $o) }}" target="_blank" class="ml-2 text-blue-600 hover:underline">Print Invoice</a>
+                                            <a href="{{ route('orders.invoice', $o) }}" target="_blank"  
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
+                                            >
+                                                <x-heroicon-o-printer class="w-4 h-4" />
+                                            </a>
                                         @endcan
                                     </td>
                                 </tr>
